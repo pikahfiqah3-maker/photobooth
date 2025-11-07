@@ -971,12 +971,11 @@ displayMessage('✅ All 4 frames selected! You can now start the camera.', 3000)
         function hideQRCodeModal() {
             elements.qrModal.classList.add('hidden');
         }
-<script>
 function resetAndStartNew() {
     // Stop any running camera
     stopCamera();
 
-    // Reset all session data
+    // Reset all state
     selectedLayout = null;
     selectedFrame = null;
     capturedImages = [];
@@ -984,7 +983,7 @@ function resetAndStartNew() {
     currentFrameSlotIndex = 0;
     captureLoopActive = false;
 
-    // Reset UI elements
+    // Reset UI buttons and overlays
     elements.startCaptureBtn.disabled = false;
     elements.startCaptureBtn.classList.remove('hidden');
     elements.retakeBtn.classList.add('hidden');
@@ -993,29 +992,22 @@ function resetAndStartNew() {
     elements.countdownOverlay.classList.add('hidden');
     elements.captureStatus.textContent = "Ready to start!";
 
-    // ✅ Clear any previous photo preview
-    const photoPreview = document.getElementById('final-photo-preview');
-    if (photoPreview) {
-        photoPreview.src = '';
-    }
-
-    // ✅ Reinitialize layout & frame options
+    // ✅ Reinitialize layouts (so new session works)
     setupLayouts();
 
-    // ✅ Go back to welcome page (or change to 'page-layout' if you want to skip welcome)
+    // ✅ Go back to welcome page properly
     showPage('page-welcome');
 
-    // ✅ Optional small toast message
-    if (typeof displayMessage === 'function') {
-        displayMessage("🎉 Ready for a new photo session!");
-    }
+    // ✅ Show success message
+    displayMessage("🎉 Ready for a new photo session!");
 }
 
-// --- APP STARTUP ---
-window.onload = function() {
-    setupLayouts();
-    showPage('page-welcome'); // Start on the welcome page
-};
-</script>
+
+        // --- APP STARTUP ---
+        window.onload = function() {
+            setupLayouts();
+            showPage('page-welcome'); // Start on the welcome page
+        };
+    </script>
 </body>
 </html>
