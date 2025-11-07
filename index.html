@@ -4,151 +4,111 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OptiSaver Photo Booth</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-    /* --- CSS STYLES --- */
-    /* Custom styles for a dark, engaging photobooth look */
-    body {
-        font-family: 'Inter', sans-serif;
-        background-color: #ffff9d; /* Light yellow background */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        margin: 0;
-        padding: 1rem;
-    }
-
-    .app-container {
-        max-width: 600px;
-        width: 100%;
-        background-color: #264E2A; /* Deep green */
-        border-radius: 1.5rem;
-        box-shadow: 0 20px 25px -5px rgba(128, 91, 91, 0.5),
-                    0 10px 10px -5px rgba(0, 0, 0, 0.4);
-        padding: 1.5rem;
-        min-height: 600px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        color: #f3f4f6;
-    }
-
-    .page {
-        width: 100%;
-        height: 100%;
-        display: none; /* Controlled by JS */
-        text-align: center;
-        min-height: 500px;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-    }
-
-    /* ---- Responsive camera + overlay styles ---- */
-    .camera-wrapper {
-        width: 100%;
-        max-width: 500px;       /* Larger on desktop */
-        aspect-ratio: 3 / 4;    /* Portrait-style camera view */
-        position: relative;
-        margin: 0 auto;
-        overflow: hidden;
-        border-radius: 0.75rem;
-        background-color: black;
-    }
-
-    /* Video feed */
-    #camera-feed {
-        transform: scaleX(-1); /* Mirror for front camera */
-        width: 100%;
-        height: 100%;
-        object-fit: contain;   /* ✅ Keeps full frame visible */
-        display: block;
-        border: 4px solid #60a5fa; /* Blue border */
-        border-radius: 0.75rem;
-        background-color: black;
-    }
-
-    /* Live overlay frame */
-    #live-frame-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: contain;   /* Matches camera scaling */
-        pointer-events: none;  /* Allows clicks through */
-        border-radius: 0.75rem;
-    }
-
-    /* Countdown overlay */
-    #countdown-overlay {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 4.5rem;
-        font-weight: bold;
-        color: #fef3c7; /* Light yellow text */
-        text-shadow: 0 0 12px #f59e0b;
-        background-color: rgba(0, 0, 0, 0.25);
-        border-radius: 0.75rem;
-    }
-
-    /* Responsive tweak for small phones */
-    @media (max-width: 420px) {
-        .camera-wrapper { max-width: 360px; aspect-ratio: 2 / 3; }
-        #countdown-overlay { font-size: 3rem; }
-    }
-
-    /* Frame and selection styles (your original styles kept) */
-    .frame-card {
-        border: 3px solid transparent;
-    }
-    .frame-card:hover {
-        border-color: #60a5fa;
-    }
-    .frame-preview {
-        width: 100%;
-        height: 120px;
-        object-fit: cover;
-        border-radius: 0.5rem;
-        margin-bottom: 0.75rem;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
-    .multi-frame-selection {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        max-width: 500px;
-        margin: 0 auto;
-    }
-    .multi-frame-slots {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
-        width: 100%;
-    }
-    .slot-card {
-        background-color: #4b5563;
-        padding: 1rem;
-        border-radius: 0.75rem;
-        border: 2px dashed #9ca3af;
-        min-height: 100px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-    }
-    .slot-card.selected {
-        border-color: #10b981; /* Emerald green */
-        background-color: #1f2937;
-    }
-</style>
-
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* --- CSS STYLES --- */
+        /* Custom styles for a dark, engaging photobooth look */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffff89; /* Dark Slate */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+        }
+        .app-container {
+            max-width: 600px; /* Increased max width for better layout visibility */
+            width: 100%;
+            background-color: #264E2A; /* Medium Slate */
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(128, 91, 91, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+            padding: 1.5rem;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #f3f4f6;
+        }
+        .page {
+            width: 100%;
+            height: 100%;
+            display: none; /* Controlled by JS */
+            text-align: center;
+            min-height: 500px;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        /* Style for the video feed to ensure it fits and looks good */
+        #camera-feed {
+            transform: scaleX(-1); /* Mirror the camera view */
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 0.75rem;
+            border: 4px solid #60a5fa; /* Blue border */
+            background-color: black;
+        }
+        #countdown-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 8rem;
+            font-weight: bold;
+            color: #fef3c7; /* Light Yellow */
+            text-shadow: 0 0 20px #f59e0b;
+            background-color: rgba(0, 0, 0, 0.4);
+            border-radius: 0.75rem;
+        }
+        .frame-card {
+            border: 3px solid transparent;
+        }
+        .frame-card:hover {
+            border-color: #60a5fa;
+        }
+        .frame-preview {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .multi-frame-selection {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .multi-frame-slots {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            width: 100%;
+        }
+        .slot-card {
+            background-color: #4b5563;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 2px dashed #9ca3af;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .slot-card.selected {
+            border-color: #10b981; /* Emerald green */
+            background-color: #1f2937;
+        }
+    </style>
 </head>
 <body>
 
@@ -222,36 +182,32 @@
 <!-- 3. PHOTO TAKING SCREEN (LOGICAL EQUIVALENT OF snap.html) -->
 <div id="page-camera" class="page">
     <h2 id="camera-title" class="text-2xl font-bold mb-4 text-white"></h2>
-
-    <!-- ✅ Fixed wrapper for responsive camera on phones -->
-    <div class="camera-wrapper mb-4">
+    <div class="relative w-full mb-4 max-w-sm mx-auto">
         <video id="camera-feed" playsinline autoplay></video>
 
         <!-- ✅ Live frame overlay (transparent PNG frame shown over camera) -->
-        <img id="live-frame-overlay" class="hidden" />
+        <img id="live-frame-overlay"
+             class="absolute top-0 left-0 w-full h-full object-cover rounded-xl pointer-events-none hidden" />
 
-        <!-- ✅ Countdown overlay -->
-        <div id="countdown-overlay" class="hidden"></div>
+        <div id="countdown-overlay" class="rounded-xl hidden"></div>
     </div>
 
-    <div id="capture-status" class="text-lg text-gray-300 mb-4 font-mono">Ready to start!</div>
 
-    <div class="flex space-x-4">
-        <button id="start-capture-btn"
-            class="px-6 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow-md transition duration-150">
-            Start Capture
-        </button>
-        <button id="retake-btn"
-            class="px-6 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg shadow-md transition duration-150 hidden">
-            Retake (Current Pose)
-        </button>
-        <button id="done-btn"
-            class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-md transition duration-150 hidden"
-            disabled>
-            Done &rarr; Preview
-        </button>
-    </div>
-</div>
+
+            <div id="capture-status" class="text-lg text-gray-300 mb-4 font-mono">Ready to start!</div>
+
+            <div class="flex space-x-4">
+                <button id="start-capture-btn" class="px-6 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow-md transition duration-150">
+                    Start Capture
+                </button>
+                <button id="retake-btn" class="px-6 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg shadow-md transition duration-150 hidden">
+                    Retake (Current Pose)
+                </button>
+                <button id="done-btn" class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-md transition duration-150 hidden" disabled>
+                    Done &rarr; Preview
+                </button>
+            </div>
+        </div>
 
         <!-- 4. PREVIEW SCREEN -->
         <div id="page-preview" class="page">
@@ -971,7 +927,8 @@ displayMessage('✅ All 4 frames selected! You can now start the camera.', 3000)
         function hideQRCodeModal() {
             elements.qrModal.classList.add('hidden');
         }
-function resetAndStartNew() {
+
+      function resetAndStartNew() {
     // Stop any running camera
     stopCamera();
 
