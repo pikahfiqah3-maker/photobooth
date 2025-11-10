@@ -46,12 +46,31 @@
         #camera-feed {
             transform: scaleX(-1); /* Mirror the camera view */
             width: 100%;
-            max-height: 400px;
+            /* FIX: Removed the restrictive max-height: 400px; */
+            height: auto; /* Allow height to adapt to its relative container */
             object-fit: cover;
             border-radius: 0.75rem;
             border: 4px solid #60a5fa; /* Blue border */
             background-color: black;
         }
+        
+        /* The relative wrapper that contains the video and overlay */
+        .relative.video-container-wrapper {
+             /* Set a maximum height for the camera area in standard view */
+            max-height: 400px; 
+            max-width: 400px;
+            width: 100%;
+            aspect-ratio: 1 / 1; /* Keep a square aspect ratio for the container */
+            margin: 0 auto;
+        }
+        
+        #live-frame-overlay {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 0.75rem;
+        }
+        
         #countdown-overlay {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -108,19 +127,57 @@
             border-color: #10b981; /* Emerald green */
             background-color: #1f2937;
         }
+
+        /* --- Fullscreen Camera Fix --- */
+        /* FIXED: Use specific selectors for fullscreen elements within the body */
+
+        .fullscreen-active #page-camera .relative.video-container-wrapper {
+            /* Override standard view constraints for fullscreen */
+            max-width: none; 
+            max-height: none;
+            /* Use viewport units here because document.body is marked as fullscreen-active */
+            width: 100vw !important; 
+            height: 100vh !important;
+            margin: 0;
+            aspect-ratio: unset; /* Remove aspect ratio constraint */
+            display: flex; /* Ensure inner elements stretch */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .fullscreen-active video#camera-feed {
+            width: 100% !important; /* Fill 100% of the viewport-sized container */
+            height: 100% !important;
+            object-fit: cover;
+            border: none;
+            border-radius: 0;
+        }
+
+        .fullscreen-active #live-frame-overlay {
+            width: 100% !important; /* Fill 100% of the viewport-sized container */
+            height: 100% !important;
+            border-radius: 0;
+            object-fit: cover; /* Ensure frame covers the whole screen too */
+        }
+
+        .fullscreen-active #fullscreen-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+
     </style>
 </head>
 <body>
 
     <div class="app-container">
-        <!-- Message Box for Alerts (No window.alert) -->
         <div id="message-box" class="fixed top-5 left-1/2 -translate-x-1/2 bg-red-600 text-white p-3 rounded-lg shadow-xl z-50 transition-opacity duration-300 opacity-0 pointer-events-none" role="alert"></div>
 
-        <!-- Hidden Canvas for Photo Processing -->
         <canvas id="photo-canvas" class="hidden"></canvas>
         <canvas id="strip-canvas" class="hidden"></canvas>
 
-        <!-- 1. WELCOME SCREEN (The main landing page content) -->
         <div id="page-welcome" class="page flex">
             <h1 class="text-4xl font-extrabold text-white mb-6">Welcome to OptiSaver Photo Booth!</h1>
             <p class="text-gray-300 mb-8 text-lg">Create awesome photo strips in seconds.</p>
@@ -129,30 +186,25 @@
             </button>
         </div>
 
-        <!-- 2. LAYOUT SELECTION SCREEN (LOGICAL EQUIVALENT OF chooselayout.html) -->
         <div id="page-layout" class="page">
             <h2 class="text-3xl font-bold mb-8 text-white">Choose Your Photo Strip Layout</h2>
             <div id="layout-options" class="grid grid-cols-2 gap-4 w-full">
-                <!-- Layout options will be populated by JS -->
-            </div>
+                </div>
             <button onclick="showPage('page-welcome')" class="mt-8 text-gray-400 hover:text-white transition duration-150">
                 &larr; Back to Welcome
             </button>
         </div>
 
-        <!-- 2.5. FRAME SELECTION SCREEN (SINGLE FRAME MODE) -->
         <div id="page-frame" class="page">
             <h2 class="text-3xl font-bold mb-8 text-white">Select Your Decorative Frame</h2>
             <p id="frame-mode-info" class="text-gray-400 mb-6"></p>
             <div id="frame-options" class="grid grid-cols-2 gap-6 w-full">
-                <!-- Frame options will be populated by JS -->
-            </div>
+                </div>
             <button onclick="showPage('page-layout')" class="mt-8 text-gray-400 hover:text-white transition duration-150">
                 &larr; Back to Layouts
             </button>
         </div>
         
-        <!-- 2.6. MULTI-FRAME SELECTION SCREEN -->
         <div id="page-multi-frame" class="page">
             <h2 class="text-3xl font-bold mb-6 text-white">Choose 4 Frames (1 for each Pose)</h2>
             <div class="multi-frame-selection">
@@ -166,8 +218,7 @@
                 <h3 id="current-selection-title" class="text-2xl font-semibold mb-4 text-white">Select a Frame for Pose 1</h3>
                 
                 <div id="multi-frame-options" class="grid grid-cols-2 gap-4 w-full h-96 overflow-y-auto p-2 bg-gray-700 rounded-lg shadow-inner">
-                    <!-- Frame options will be populated by JS -->
-                </div>
+                    </div>
                 
                 <button id="multi-frame-done-btn" onclick="goToCameraFromMultiFrame()" class="mt-8 px-8 py-3 bg-green-600 hover:bg-green-700 text-white text-xl font-semibold rounded-xl shadow-lg transition duration-150 opacity-50 cursor-not-allowed" disabled>
                     Start Camera Session
@@ -179,17 +230,21 @@
         </div>
 
 
-<!-- 3. PHOTO TAKING SCREEN (LOGICAL EQUIVALENT OF snap.html) -->
 <div id="page-camera" class="page">
     <h2 id="camera-title" class="text-2xl font-bold mb-4 text-white"></h2>
-    <div class="relative w-full mb-4 max-w-sm mx-auto">
+    <div class="relative w-full mb-4 max-w-sm mx-auto video-container-wrapper"> 
         <video id="camera-feed" playsinline autoplay></video>
 
-        <!-- ✅ Live frame overlay (transparent PNG frame shown over camera) -->
         <img id="live-frame-overlay"
              class="absolute top-0 left-0 w-full h-full object-cover rounded-xl pointer-events-none hidden" />
 
         <div id="countdown-overlay" class="rounded-xl hidden"></div>
+
+        <button id="fullscreen-btn" 
+    class="absolute top-2 right-2 bg-black bg-opacity-60 text-white text-sm px-3 py-1 rounded-lg hover:bg-opacity-80">
+    ⛶ Fullscreen
+</button>
+
     </div>
 
 
@@ -209,10 +264,8 @@
             </div>
         </div>
 
-        <!-- 4. PREVIEW SCREEN -->
         <div id="page-preview" class="page">
             <h2 class="text-3xl font-bold mb-6 text-white">Your Photo Strip is Ready!</h2>
-            <!-- The preview size class is dynamic depending on the aspect ratio -->
             <div id="final-strip-container" class="mb-6 bg-white p-1 rounded-lg shadow-xl w-3/4 max-w-sm">
                 <img id="final-strip-image" src="" alt="Final Photo Strip" class="w-full h-auto rounded-md"/>
             </div>
@@ -231,7 +284,6 @@
         </div>
     </div>
 
-    <!-- QR Code Modal (Hidden by default) -->
     <div id="qr-modal" class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 hidden">
         <div class="bg-white p-8 rounded-xl shadow-2xl text-center max-w-sm w-full">
             <h3 class="text-2xl font-bold text-gray-800 mb-4">Scan to Download</h3>
@@ -294,6 +346,9 @@
             document.getElementById('slot-2'),
             document.getElementById('slot-3'),
         ];
+        
+        // Cache the video wrapper element for fullscreen target
+        const videoContainerWrapper = document.querySelector(".video-container-wrapper");
 
 
         // --- LAYOUT DEFINITIONS ---
@@ -598,7 +653,7 @@ displayMessage('✅ All 4 frames selected! You can now start the camera.', 3000)
         cameraStream = stream;
         elements.cameraFeed.srcObject = stream;
 
-        // ✅ Show frame overlay live during camera view
+        // Show frame overlay live during camera view
         const overlay = document.getElementById('live-frame-overlay');
         if (Array.isArray(selectedFrame)) {
             // In multi-frame mode, just show the first frame as preview
@@ -949,13 +1004,13 @@ displayMessage('✅ All 4 frames selected! You can now start the camera.', 3000)
     elements.countdownOverlay.classList.add('hidden');
     elements.captureStatus.textContent = "Ready to start!";
 
-    // ✅ Reinitialize layouts (so new session works)
+    // Reinitialize layouts (so new session works)
     setupLayouts();
 
-    // ✅ Go back to welcome page properly
+    // Go back to welcome page properly
     showPage('page-welcome');
 
-    // ✅ Show success message
+    // Show success message
     displayMessage("🎉 Ready for a new photo session!");
 }
 
@@ -965,6 +1020,47 @@ displayMessage('✅ All 4 frames selected! You can now start the camera.', 3000)
             setupLayouts();
             showPage('page-welcome'); // Start on the welcome page
         };
+
+        // --- FULLSCREEN TOGGLE ---
+// --- FULLSCREEN TOGGLE ---
+document.addEventListener("DOMContentLoaded", () => {
+    const fullscreenBtn = document.getElementById("fullscreen-btn");
+    // FIXED: Target the video wrapper for fullscreen (which now correctly scales using CSS)
+    const videoContainer = document.querySelector(".relative.video-container-wrapper"); 
+
+    fullscreenBtn.addEventListener("click", async () => {
+        if (!document.fullscreenElement) {
+            // Enter fullscreen
+            if (videoContainer.requestFullscreen) {
+                await videoContainer.requestFullscreen();
+            } else if (videoContainer.webkitRequestFullscreen) {
+                videoContainer.webkitRequestFullscreen();
+            }
+            // Keep the class on the body to drive the fixed fullscreen styling
+            document.body.classList.add("fullscreen-active"); 
+            fullscreenBtn.textContent = "✖ Exit";
+        } else {
+            // Exit fullscreen
+            if (document.exitFullscreen) {
+                await document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
+            document.body.classList.remove("fullscreen-active");
+            fullscreenBtn.textContent = "⛶ Fullscreen";
+        }
+    });
+
+    // Handle ESC key or manual exit
+    document.addEventListener("fullscreenchange", () => {
+        if (!document.fullscreenElement) {
+            document.body.classList.remove("fullscreen-active");
+            fullscreenBtn.textContent = "⛶ Fullscreen";
+        }
+    });
+});
+
+
     </script>
 </body>
 </html>
