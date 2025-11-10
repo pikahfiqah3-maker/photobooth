@@ -168,12 +168,44 @@
         object-fit: contain !important; 
     }
 
-    .fullscreen-active #fullscreen-btn {
+.fullscreen-active #fullscreen-btn {
         position: fixed;
         top: 20px;
         right: 20px;
         z-index: 9999;
         background-color: rgba(0, 0, 0, 0.6);
+    }
+    
+    /* --- NEW CSS for Fullscreen Take Photo Button --- */
+    .fullscreen-active #fullscreen-capture-btn {
+        position: fixed;
+        bottom: 30px; /* Position from the bottom */
+        left: 50%; /* Center horizontally */
+        transform: translateX(-50%);
+        z-index: 9999;
+        /* Style it like a big, prominent shutter button */
+        background-color: #ef4444; /* Red-500 */
+        color: white;
+        border: 4px solid #f9fafb; /* Light border */
+        border-radius: 9999px; /* Fully rounded */
+        width: 80px;
+        height: 80px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.5rem;
+        cursor: pointer;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+        transition: background-color 0.15s;
+    }
+
+    .fullscreen-active #fullscreen-capture-btn:hover {
+        background-color: #dc2626; /* Red-600 */
+    }
+
+    /* Hide the original controls when in fullscreen */
+    .fullscreen-active #page-camera .flex.space-x-4 {
+        display: none !important;
     }
 
     </style>
@@ -253,8 +285,10 @@
     ⛶ Fullscreen
 </button>
 
-    </div>
-
+<button id="fullscreen-capture-btn" class="hidden">
+    📸
+</button>
+</div>
 
 
             <div id="capture-status" class="text-lg text-gray-300 mb-4 font-mono">Ready to start!</div>
@@ -1047,12 +1081,34 @@ displayMessage('✅ All 4 frames selected! You can now start the camera.', 3000)
             showPage('page-welcome'); // Start on the welcome page
         };
 
-        // --- FULLSCREEN TOGGLE ---
-// --- FULLSCREEN TOGGLE ---
+      // --- FULLSCREEN TOGGLE ---
 document.addEventListener("DOMContentLoaded", () => {
     const fullscreenBtn = document.getElementById("fullscreen-btn");
     // FIXED: Target the video wrapper for fullscreen (which now correctly scales using CSS)
     const videoContainer = document.querySelector(".relative.video-container-wrapper"); 
+    
+    // ⭐ NEW: Get the fullscreen capture button element ⭐
+    const fullscreenCaptureBtn = document.getElementById("fullscreen-capture-btn");
+
+    // ⭐ NEW: Click handler for the fullscreen capture button ⭐
+    fullscreenCaptureBtn.addEventListener("click", () => {
+        // We trigger a click on the START/RETAKE/DONE button, whichever is visible/active
+        if (!elements.startCaptureBtn.disabled && !elements.startCaptureBtn.classList.contains('hidden')) {
+             // Check if capture is currently active (to prevent spamming the button during countdown)
+             if (!captureLoopActive) { 
+                 elements.startCaptureBtn.click();
+             } else {
+                 displayMessage("📸 Pose capture in progress, please wait...", 2000);
+             }
+        } else if (!elements.retakeBtn.classList.contains('hidden')) {
+             elements.retakeBtn.click();
+        } else if (!elements.doneBtn.disabled && !elements.doneBtn.classList.contains('hidden')) {
+             elements.doneBtn.click();
+        } else {
+             displayMessage("Please wait for the capture sequence to be ready...", 2000);
+        }
+    });
+    // ⭐ END NEW ELEMENT HANDLER ⭐
 
     fullscreenBtn.addEventListener("click", async () => {
         if (!document.fullscreenElement) {
@@ -1085,7 +1141,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
-
 
     </script>
 </body>
