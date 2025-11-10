@@ -707,16 +707,34 @@ displayMessage('✅ All 4 frames selected! You can now start the camera.', 3000)
 
         // --- CAPTURE SEQUENCE (Corresponds to snap.html logic) ---
 
+// --- CAPTURE SEQUENCE (Corresponds to snap.html logic) ---
+
         async function startCaptureSequence() {
             if (captureLoopActive) return;
             captureLoopActive = true;
             elements.startCaptureBtn.disabled = true;
 
             const totalPoses = selectedLayout.poses;
+            const liveFrameOverlay = document.getElementById('live-frame-overlay'); // Get the overlay element
 
             while (capturedImages.length < totalPoses) {
-                const currentPose = capturedImages.length + 1;
+                const currentPoseIndex = capturedImages.length; // Index starts at 0
+                const currentPose = currentPoseIndex + 1; // Pose number starts at 1
                 elements.captureStatus.textContent = `Getting ready for Pose ${currentPose}...`;
+                
+                // *** FIX START: Update the live frame overlay for the current pose ***
+                if (Array.isArray(selectedFrame)) {
+                    // Check if a frame is selected for this pose index
+                    const frameForCurrentPose = selectedFrame[currentPoseIndex];
+                    if (frameForCurrentPose) {
+                        liveFrameOverlay.src = frameForCurrentPose.file;
+                        liveFrameOverlay.classList.remove('hidden');
+                    } else {
+                        // Fallback if somehow a pose doesn't have a frame (shouldn't happen with current logic)
+                        liveFrameOverlay.classList.add('hidden');
+                    }
+                }
+                // *** FIX END ***
 
                 // Run countdown
                 await new Promise(resolve => {
