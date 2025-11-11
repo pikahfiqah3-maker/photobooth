@@ -343,7 +343,7 @@
         <canvas id="strip-canvas" class="hidden"></canvas>
 
         <div id="page-welcome" class="page flex">
-            <h1 class="text-4xl font-extrabold mb-1">OptiSaver Photobooth</h1>
+            <h1 class="text-4xl font-extrabold mb-1">OptiSaver Booth</h1>
             <p class="text-gray-300 mb-8 text-xl">Clear Version, Credible Value</p>
             <button onclick="showPage('page-layout')" class="start-button transition duration-150 transform hover:scale-105">
                 START 📸
@@ -354,7 +354,7 @@
             <h2 class="text-3xl font-bold mb-8 text-white">Choose Your Layout</h2>
             <div id="layout-options" class="grid grid-cols-2 gap-4 w-full">
                 </div>
-            <button onclick="showPage('page-welcome')" class="mt-8 text-gray-400 hover:text-white transition duration-150">
+            <button onclick="showPage('page-welcome')" class="mt-8 text-white-400 hover:text-white transition duration-150">
                 &larr; Back to Welcome
             </button>
         </div>
@@ -413,10 +413,15 @@
     📸
 </button>
 </div>
-
-
-            <div id="capture-status" class="text-lg text-gray-300 mb-4 font-mono">Ready to start!</div>
-
+    <div class="flex items-center justify-center mb-4 space-x-2">
+        <label for="timer-select" class="text-gray-300 font-medium">Capture Timer:</label>
+        <select id="timer-select" class="px-3 py-1 bg-gray-700 text-white rounded-lg border border-gray-600 focus:ring-yellow-400 focus:border-yellow-400">
+            <option value="3">3 Seconds</option>
+            <option value="5">5 Seconds</option>
+            <option value="10">10 Seconds</option>
+        </select>
+    </div>
+    <div id="capture-status" class="text-lg text-gray-300 mb-4 font-mono">Ready to start!</div>
             <div class="flex space-x-4">
                 <button id="start-capture-btn" class="px-6 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow-md transition duration-150">
                     Start Capture
@@ -430,21 +435,21 @@
             </div>
         </div>
 
-        <div id="page-preview" class="page">
+   <div id="page-preview" class="page">
             <h2 class="text-3xl font-bold mb-6 text-white">Your Photo Strip is Ready!</h2>
             <div id="final-strip-container" class="mb-6 bg-white p-1 rounded-lg shadow-xl w-3/4 max-w-sm">
                 <img id="final-strip-image" src="" alt="Final Photo Strip" class="w-full h-auto rounded-md"/>
             </div>
+                        <div class="flex flex-col space-y-4 w-full max-w-xs">
 
-            <div class="flex flex-col space-y-4 w-full max-w-xs">
-                <button onclick="downloadStrip()" class="px-6 py-3 bg-pink-600 hover:bg-pink-700 text-white font-semibold rounded-xl shadow-lg transition duration-150">
+                <button onclick="downloadStrip()" class="start-button flex-1 text-base py-2 px-4 transition duration-150 transform hover:scale-[1.02]">
                     Download Image
                 </button>
-                <button onclick="showQRCodeModal()" class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl shadow-lg transition duration-150">
+                <button onclick="showQRCodeModal()" class="start-button flex-1 text-base py-2 px-4 transition duration-150 transform hover:scale-[1.02]">
                     Download via QR Code
                 </button>
-                <button onclick="resetAndStartNew()" class="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-xl shadow-lg transition duration-150">
-                    Take New Photo
+                <button onclick="resetAndStartNew()" class="start-button flex-1 text-base py-2 px-4 transition duration-150 transform hover:scale-[1.02]">
+                    Download Image
                 </button>
             </div>
         </div>
@@ -473,7 +478,7 @@
         let capturedImages = [];
         let cameraStream = null;
         let captureLoopActive = false;
-        const countdownSeconds = 3;
+        let countdownSeconds = 3;
         
         // State for multi-frame selection
         let multiFrameSelection = [null, null, null, null];
@@ -504,7 +509,8 @@
         elements.qrCodeImage = document.getElementById('qr-code-image');
         elements.messageBox = document.getElementById('message-box');
         elements.finalStripContainer = document.getElementById('final-strip-container');
-        
+        elements.timerSelect = document.getElementById('timer-select'); // NEW ELEMENT
+
         // Cache the slot elements
         const frameSlotElements = [
             document.getElementById('slot-0'),
@@ -1229,11 +1235,26 @@ const layouts = {
 
 
         // --- APP STARTUP ---
+// --- APP STARTUP ---
+        
+        function setupTimerSelection() {
+            // Set the default value on load
+            elements.timerSelect.value = countdownSeconds; 
+            
+            // Add event listener to update the global variable
+            elements.timerSelect.addEventListener('change', (event) => {
+                countdownSeconds = parseInt(event.target.value);
+                displayMessage(`Capture timer set to ${countdownSeconds} seconds.`, 2000);
+            });
+        }
+        
         window.onload = function() {
             setupLayouts();
+            setupTimerSelection(); // NEW: Initialize the timer logic
             showPage('page-welcome'); // Start on the welcome page
         };
 
+      // --- FULLSCREEN TOGGLE ---
       // --- FULLSCREEN TOGGLE ---
 document.addEventListener("DOMContentLoaded", () => {
     const fullscreenBtn = document.getElementById("fullscreen-btn");
