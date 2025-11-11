@@ -8,30 +8,53 @@
     <style>
         /* --- CSS STYLES --- */
         /* Custom styles for a dark, engaging photobooth look */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #ffff89; /* Dark Slate */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 1rem;
-        }
-        .app-container {
-            max-width: 600px; /* Increased max width for better layout visibility */
-            width: 100%;
-            background-color: #264E2A; /* Medium Slate */
-            border-radius: 1.5rem;
-            box-shadow: 0 20px 25px -5px rgba(128, 91, 91, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
-            padding: 1.5rem;
-            min-height: 600px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #f3f4f6;
-        }
+        
+        /* 🎨 THEME COLORS 🎨
+        Dark Green (Primary): #264E2A
+        Accent Yellow (Logo Glasses): #FFDD4A 
+        White/Light Text: #f3f4f6
+        */
+        
+       body {
+    font-family: 'Inter', sans-serif;
+
+    /* 1. Solid color as a fallback in case image fails to load */
+    background-color: #264E2A;
+
+    /* 2. Add your background image */
+    background-image: url('background2.jpg');
+
+    /* 3. Control image display */
+    background-size: cover;          /* Make image cover entire screen */
+    background-position: center;     /* Center the image */
+    background-attachment: fixed;    /* Keep image fixed during scroll */
+    background-repeat: no-repeat;    /* Prevent repeating */
+
+    /* 4. Layout settings */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 1rem;
+}
+
+.app-container {
+    background-color: transparent; /* Remove the dark green box */
+    box-shadow: none; /* Remove shadow if you don’t want any border effect */
+    border-radius: 0; /* Optional: remove rounded corners */
+    padding: 1.5rem;
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #f3f4f6;
+    max-width: 90%;
+    width: 500px;
+}
+
+        
         .page {
             width: 100%;
             height: 100%;
@@ -42,26 +65,26 @@
             align-items: center;
             flex-direction: column;
         }
+        
         /* Style for the video feed to ensure it fits and looks good */
         #camera-feed {
             transform: scaleX(-1); /* Mirror the camera view */
             width: 100%;
-            /* FIX: Removed the restrictive max-height: 400px; */
-            height: auto; /* Allow height to adapt to its relative container */
+            height: auto; 
             object-fit: cover;
             border-radius: 0.75rem;
-            border: 4px solid #60a5fa; /* Blue border */
+            /* 4. Use Accent Yellow/Gold for camera border */
+            border: 4px solid #FFDD4A; 
             background-color: black;
         }
         
         /* The relative wrapper that contains the video and overlay */
         .relative.video-container-wrapper {
-             /* Set a maximum height for the camera area in standard view */
-            max-height: 400px; 
-            max-width: 400px;
-            width: 100%;
-            aspect-ratio: 1 / 1; /* Keep a square aspect ratio for the container */
-            margin: 0 auto;
+             max-height: 400px; 
+             max-width: 400px;
+             width: 100%;
+             aspect-ratio: 1 / 1; 
+             margin: 0 auto;
         }
         
         #live-frame-overlay {
@@ -79,8 +102,9 @@
             align-items: center;
             font-size: 8rem;
             font-weight: bold;
-            color: #fef3c7; /* Light Yellow */
-            text-shadow: 0 0 20px #f59e0b;
+            /* 5. Countdown text color */
+            color: #FFDD4A; 
+            text-shadow: 0 0 20px #FFDD4A;
             background-color: rgba(0, 0, 0, 0.4);
             border-radius: 0.75rem;
         }
@@ -88,7 +112,7 @@
             border: 3px solid transparent;
         }
         .frame-card:hover {
-            border-color: #60a5fa;
+            border-color: #FFDD4A; /* Accent yellow on hover */
         }
         .frame-preview {
             width: 100%;
@@ -98,21 +122,10 @@
             margin-bottom: 0.75rem;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
-        .multi-frame-selection {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        .multi-frame-slots {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            width: 100%;
-        }
+        
+        /* --- Multi-Frame Styles (Adjusting colors) --- */
         .slot-card {
-            background-color: #4b5563;
+            background-color: #385e3c; /* Darker green */
             padding: 1rem;
             border-radius: 0.75rem;
             border: 2px dashed #9ca3af;
@@ -124,20 +137,17 @@
             cursor: pointer;
         }
         .slot-card.selected {
-            border-color: #10b981; /* Emerald green */
-            background-color: #1f2937;
+            border-color: #FFDD4A; /* Accent Yellow */
+            background-color: #1a361e; /* Even darker green */
+        }
+        .slot-card span {
+             color: #FFDD4A !important;
         }
 
-        /* --- Fullscreen Camera Fix --- */
-        /* FIXED: Use specific selectors for fullscreen elements within the body */
 
-
-    /* ... (existing styles) ... */
-
-    /* --- Fullscreen Camera Fix --- */
+    /* --- Fullscreen Camera Fix (Keeping for functionality) --- */
 
     .fullscreen-active #page-camera .relative.video-container-wrapper {
-        /* Override standard view constraints for fullscreen */
         max-width: none; 
         max-height: none;
         width: 100vw !important; 
@@ -147,14 +157,12 @@
         display: flex; 
         justify-content: center;
         align-items: center;
-        /* Crucial: ensure the entire container is black/dark slate for letterboxing */
         background-color: black; 
     }
 
     .fullscreen-active video#camera-feed {
         width: 100% !important; 
         height: 100% !important;
-        /* FIX: Change from cover to contain */
         object-fit: contain !important; 
         border: none;
         border-radius: 0;
@@ -164,7 +172,6 @@
         width: 100% !important; 
         height: 100% !important;
         border-radius: 0;
-        /* FIX: Change from cover to contain */
         object-fit: contain !important; 
     }
 
@@ -176,18 +183,17 @@
         background-color: rgba(0, 0, 0, 0.6);
     }
     
-    /* --- NEW CSS for Fullscreen Take Photo Button --- */
+    /* --- NEW CSS for Fullscreen Take Photo Button (Keeping the red for high contrast capture) --- */
     .fullscreen-active #fullscreen-capture-btn {
         position: fixed;
-        bottom: 30px; /* Position from the bottom */
-        left: 50%; /* Center horizontally */
+        bottom: 30px; 
+        left: 50%; 
         transform: translateX(-50%);
         z-index: 9999;
-        /* Style it like a big, prominent shutter button */
-        background-color: #ef4444; /* Red-500 */
+        background-color: #ef4444; 
         color: white;
-        border: 4px solid #f9fafb; /* Light border */
-        border-radius: 9999px; /* Fully rounded */
+        border: 4px solid #f9fafb; 
+        border-radius: 9999px; 
         width: 80px;
         height: 80px;
         display: flex;
@@ -200,12 +206,130 @@
     }
 
     .fullscreen-active #fullscreen-capture-btn:hover {
-        background-color: #dc2626; /* Red-600 */
+        background-color: #dc2626; 
     }
 
     /* Hide the original controls when in fullscreen */
     .fullscreen-active #page-camera .flex.space-x-4 {
         display: none !important;
+    }
+
+    /* --- Custom Welcome Page Styling based on Sample Image --- */
+    #page-welcome {
+        /* Set minimum height to center the content nicely */
+        min-height: 400px; 
+        justify-content: center;
+    }
+
+    #page-welcome h1 {
+        /* Match the large, bold, central title of the sample */
+        font-size: 4rem; /* Larger than 4xl */
+        font-weight: 900; /* Extra bold */
+        color: #FFDD4A; /* Accent Yellow */
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        /* Optional: Add a subtle text shadow for pop */
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5); 
+    }
+
+    #page-welcome p {
+        /* Match the descriptive text style */
+        font-size: 1.5rem; /* Larger description */
+        color: #f3f4f6;
+        margin-bottom: 3rem;
+        font-style: italic;
+    }
+
+    .start-button {
+        /* Match the prominent, rounded, and colorful START button of the sample */
+        padding: 1rem 3rem;
+        /* Use a contrasting color like pink/red for the START button for pop, 
+           or use the accent yellow if you want to stick strictly to the logo palette. 
+           I'll use a vibrant gold/yellow here. */
+        background-color: #FFDD4A; 
+        color: #264E2A; /* Dark Green text on the button */
+        font-size: 1.8rem;
+        font-weight: bold;
+        border-radius: 9999px; /* Fully rounded */
+        box-shadow: 0 6px 15px -3px rgba(255, 221, 74, 0.5), 0 4px 6px -2px rgba(255, 221, 74, 0.3);
+        transition: all 0.2s;
+        border: 3px solid #f3f4f6; /* White border for extra pop */
+    }
+
+    .start-button:hover {
+        background-color: #ffe680;
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px -4px rgba(255, 221, 74, 0.7);
+    }
+
+    /* --- General Button Styles --- */
+
+    .bg-indigo-600 { /* Old button */
+        background-color: #FFDD4A;
+        color: #264E2A;
+    }
+    .hover\:bg-indigo-700:hover { /* Old button hover */
+        background-color: #ffe680;
+    }
+
+    .bg-green-500 { /* Start Capture */
+        background-color: #FFDD4A;
+        color: #264E2A;
+    }
+    .hover\:bg-green-600:hover {
+        background-color: #ffe680;
+    }
+
+    .bg-yellow-500 { /* Retake */
+        background-color: #f59e0b; /* A darker yellow for distinction */
+        color: white;
+    }
+    .hover\:bg-yellow-600:hover {
+        background-color: #d97706;
+    }
+    
+    .bg-blue-500 { /* Done */
+        background-color: #3b82f6; /* Keeping blue for primary action distinction */
+        color: white;
+    }
+    .hover\:bg-blue-600:hover {
+        background-color: #2563eb;
+    }
+
+    .bg-pink-600 { /* Download */
+        background-color: #FFDD4A;
+        color: #264E2A;
+    }
+    .hover\:bg-pink-700:hover {
+        background-color: #ffe680;
+    }
+
+    .bg-purple-600 { /* QR Code */
+        background-color: #7c3aed; /* Keeping purple for distinction */
+        color: white;
+    }
+    .hover\:bg-purple-700:hover {
+        background-color: #6d28d9;
+    }
+
+    .bg-green-600 { /* Multi-Frame Done */
+        background-color: #10b981; /* Keeping a strong green for completion/go button */
+        color: white;
+    }
+    .hover\:bg-green-700:hover {
+        background-color: #059669;
+    }
+    
+    /* Layout & Frame card backgrounds */
+    .bg-gray-600 {
+        background-color: #385e3c; /* Darker theme green */
+    }
+    .hover\:bg-indigo-500:hover {
+        background-color: #518c55; /* Lighter theme green on hover */
+    }
+    .hover\:bg-gray-500:hover {
+        background-color: #518c55;
     }
 
     </style>
@@ -219,15 +343,15 @@
         <canvas id="strip-canvas" class="hidden"></canvas>
 
         <div id="page-welcome" class="page flex">
-            <h1 class="text-4xl font-extrabold text-white mb-6">Welcome to OptiSaver Photo Booth!</h1>
-            <p class="text-gray-300 mb-8 text-lg">Create awesome photo strips in seconds.</p>
-            <button onclick="showPage('page-layout')" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xl font-semibold rounded-xl shadow-lg transition duration-150 transform hover:scale-105">
-                Start Booth Session
+            <h1 class="text-4xl font-extrabold mb-1">OptiSaver Photobooth</h1>
+            <p class="text-gray-300 mb-8 text-xl">Clear Version, Credible Value</p>
+            <button onclick="showPage('page-layout')" class="start-button transition duration-150 transform hover:scale-105">
+                START 📸
             </button>
         </div>
 
         <div id="page-layout" class="page">
-            <h2 class="text-3xl font-bold mb-8 text-white">Choose Your Photo Strip Layout</h2>
+            <h2 class="text-3xl font-bold mb-8 text-white">Choose Your Layout</h2>
             <div id="layout-options" class="grid grid-cols-2 gap-4 w-full">
                 </div>
             <button onclick="showPage('page-welcome')" class="mt-8 text-gray-400 hover:text-white transition duration-150">
@@ -396,9 +520,33 @@
         // --- LAYOUT DEFINITIONS ---
         // stripWidth and stripHeight define the target canvas size in pixels.
 const layouts = {
-    test1: { poses: 1, description: "6 x 4 Photo (1 Pose)", stripWidth: 1800, stripHeight: 1200, aspectRatio: 'photo', mode: 'single-frame' },
-    test2: { poses: 4, description: "6 x 2 Strip (4 Pose) - MULTI-FRAME", stripWidth: 900, stripHeight: 2700, aspectRatio: 'strip', mode: 'multi-frame' },
-    test3: { poses: 2, description: "6 x 4 Strip (2 Pose) - MULTI-FRAME", stripWidth: 1200, stripHeight: 1600, aspectRatio: 'photo', mode: 'multi-frame' },
+    A: { 
+        poses: 1, 
+        description: "6 x 4 Photo (1 Pose)", 
+        stripWidth: 1800, 
+        stripHeight: 1200, 
+        aspectRatio: 'photo', 
+        mode: 'single-frame',
+        image: 'layout.png' 
+    },
+    B: { 
+        poses: 4, 
+        description: "6 x 2 Strip (4 Pose) - MULTI-FRAME", 
+        stripWidth: 900, 
+        stripHeight: 2700, 
+        aspectRatio: 'strip', 
+        mode: 'multi-frame',
+        image: 'layout.png' // ⭐ ADDED image reference
+    },
+    C: { 
+        poses: 2, 
+        description: "6 x 4 Strip (2 Pose) - MULTI-FRAME", 
+        stripWidth: 1200, 
+        stripHeight: 1600, 
+        aspectRatio: 'photo', 
+        mode: 'multi-frame',
+        image: 'layout.png' // ⭐ ADDED image reference
+    },
 };
 
         // --- FRAME DEFINITIONS (Using uploaded files) ---
@@ -524,8 +672,16 @@ const layouts = {
                 const layout = layouts[id];
                 const card = document.createElement('div');
                 card.className = 'p-4 bg-gray-600 rounded-xl shadow-lg cursor-pointer hover:bg-indigo-500 transition duration-150 transform hover:scale-[1.02] flex flex-col justify-between h-full';
+                
+                // ⭐ CORRECTED/ADDED LOGIC: Get image HTML if the layout has an image property
+                const imageHtml = layout.image ? 
+                    `<img src="${layout.image}" alt="Layout ${id} Preview" class="w-full h-auto rounded-md mb-3" style="max-height: 100px; object-fit: contain; background-color: #f3f4f6; padding: 4px;"/>` 
+                    : '';
+                // ⭐ END ADDED LOGIC
+
                 card.innerHTML = `
                     <h3 class="text-xl font-bold mb-1 text-white">Layout ${id}</h3>
+                    ${imageHtml} <!-- ⭐ INCLUDE THE IMAGE HERE ⭐ -->
                     <p class="text-gray-300 text-sm">${layout.description}</p>
                     <p class="text-gray-200 mt-2 font-mono text-xs">Poses: ${layout.poses}</p>
                 `;
@@ -579,7 +735,7 @@ const layouts = {
                 
                 // Set highlight if already selected
                 if (selectedFrame && selectedFrame.id === id) {
-                    card.style.borderColor = '#34d399';
+                    card.style.borderColor = '#FFDD4A';
                 }
             });
         }
@@ -592,7 +748,7 @@ const layouts = {
             Object.keys(frames).forEach(key => {
                 const card = document.getElementById(`frame-card-${key}`);
                 if (card) {
-                    card.style.borderColor = (key === id) ? '#34d399' : 'transparent'; // Tailwind green-400
+                    card.style.borderColor = (key === id) ? '#FFDD4A' : 'transparent'; // Accent Yellow
                 }
             });
             
@@ -614,9 +770,9 @@ const layouts = {
                 slot.onclick = () => setCurrentFrameSlot(index);
                 // Initialize slot display
                 if (multiFrameSelection[index]) {
-                    slot.innerHTML = `Pose ${index + 1} Frame: <span class="font-bold text-green-300">${multiFrameSelection[index].name}</span>`;
+                    slot.innerHTML = `Pose ${index + 1} Frame: <span class="font-bold" style="color:#FFDD4A;">${multiFrameSelection[index].name}</span>`;
                 } else {
-                    slot.innerHTML = `Pose ${index + 1} Frame: <span class="font-bold text-yellow-300">Choose...</span>`;
+                    slot.innerHTML = `Pose ${index + 1} Frame: <span class="font-bold" style="color:#f59e0b;">Choose...</span>`;
                 }
             });
             
@@ -657,7 +813,7 @@ const layouts = {
             
             // Update slot display
             const slotElement = frameSlotElements[currentFrameSlotIndex];
-            slotElement.innerHTML = `Pose ${currentFrameSlotIndex + 1} Frame: <span class="font-bold text-green-300">${frame.name}</span>`;
+            slotElement.innerHTML = `Pose ${currentFrameSlotIndex + 1} Frame: <span class="font-bold" style="color:#FFDD4A;">${frame.name}</span>`;
             
             // Move to the next slot, or enable the Done button
             const nextIndex = currentFrameSlotIndex + 1;
@@ -669,12 +825,12 @@ const layouts = {
         }
         
         function checkMultiFrameCompletion() {
-            const allSelected = multiFrameSelection.every(frame => frame !== null);
+            const allSelected = multiFrameSelection.slice(0, selectedLayout.poses).every(frame => frame !== null);
             if (allSelected) {
                 elements.multiFrameDoneBtn.disabled = false;
                 elements.multiFrameDoneBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                 elements.multiFrameDoneBtn.textContent = 'All Frames Selected! Start Camera Session';
-displayMessage('✅ All 4 frames selected! You can now start the camera.', 3000);
+                displayMessage('✅ All required frames selected! You can now start the camera.', 3000);
             }
         }
         
@@ -741,8 +897,6 @@ displayMessage('✅ All 4 frames selected! You can now start the camera.', 3000)
 
         // --- CAPTURE SEQUENCE (Corresponds to snap.html logic) ---
 
-// --- CAPTURE SEQUENCE (Corresponds to snap.html logic) ---
-
         async function startCaptureSequence() {
             if (captureLoopActive) return;
             captureLoopActive = true;
@@ -756,7 +910,7 @@ displayMessage('✅ All 4 frames selected! You can now start the camera.', 3000)
                 const currentPose = currentPoseIndex + 1; // Pose number starts at 1
                 elements.captureStatus.textContent = `Getting ready for Pose ${currentPose}...`;
                 
-                // *** FIX START: Update the live frame overlay for the current pose ***
+                // Update the live frame overlay for the current pose
                 if (Array.isArray(selectedFrame)) {
                     // Check if a frame is selected for this pose index
                     const frameForCurrentPose = selectedFrame[currentPoseIndex];
@@ -768,7 +922,6 @@ displayMessage('✅ All 4 frames selected! You can now start the camera.', 3000)
                         liveFrameOverlay.classList.add('hidden');
                     }
                 }
-                // *** FIX END ***
 
                 // Run countdown
                 await new Promise(resolve => {
@@ -1035,7 +1188,7 @@ displayMessage('✅ All 4 frames selected! You can now start the camera.', 3000)
         function showQRCodeModal() {
             // Note: Canvas environment prevents full QR generation or large data URL transfer.
             // We use a placeholder QR image for demonstration.
-            elements.qrCodeImage.src = `https://placehold.co/200x200/4f46e5/ffffff?text=QR+Code`;
+            elements.qrCodeImage.src = `https://placehold.co/200x200/FFDD4A/264E2A?text=Scan+to+Download`;
             elements.qrModal.classList.remove('hidden');
         }
 
