@@ -435,25 +435,30 @@
             </div>
         </div>
 
-   <div id="page-preview" class="page">
-            <h2 class="text-3xl font-bold mb-6 text-white">Your Photo Strip is Ready!</h2>
-            <div id="final-strip-container" class="mb-6 bg-white p-1 rounded-lg shadow-xl w-3/4 max-w-sm">
-                <img id="final-strip-image" src="" alt="Final Photo Strip" class="w-full h-auto rounded-md"/>
-            </div>
-                        <div class="flex flex-col space-y-4 w-full max-w-xs">
+ <div id="page-preview" class="page">
+    <h2 class="text-3xl font-bold mb-6 text-white">Your Photo Strip is Ready!</h2>
 
-                <button onclick="downloadStrip()" class="start-button flex-1 text-base py-2 px-4 transition duration-150 transform hover:scale-[1.02]">
-                    Download Image
-                </button>
-                <button onclick="showQRCodeModal()" class="start-button flex-1 text-base py-2 px-4 transition duration-150 transform hover:scale-[1.02]">
-                    Download via QR Code
-                </button>
-                <button onclick="resetAndStartNew()" class="start-button flex-1 text-base py-2 px-4 transition duration-150 transform hover:scale-[1.02]">
-                    Download Image
-                </button>
-            </div>
-        </div>
+    <div id="final-strip-container" class="mb-6 bg-white p-1 rounded-lg shadow-xl w-3/4 max-w-sm">
+        <img id="final-strip-image" src="" alt="Final Photo Strip" class="w-full h-auto rounded-md"/>
     </div>
+
+    <div class="flex flex-col space-y-4 w-full max-w-xs">
+        <!-- Download directly -->
+        <button onclick="downloadStrip()" class="start-button flex-1 text-base py-2 px-4 transition duration-150 transform hover:scale-[1.02]">
+            Download Image
+        </button>
+
+        <!-- Download via QR code -->
+        <button onclick="showQRCodeModal()" class="start-button flex-1 text-base py-2 px-4 transition duration-150 transform hover:scale-[1.02]">
+            Download via QR Code
+        </button>
+
+        <!-- Share on Instagram Story -->
+        <button onclick="shareOnInstagramStory()" class="start-button flex-1 text-base py-2 px-4 transition duration-150 transform hover:scale-[1.02]">
+            Share on Instagram Story
+        </button>
+    </div>
+</div>
 
     <div id="qr-modal" class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 hidden">
         <div class="bg-white p-8 rounded-xl shadow-2xl text-center max-w-sm w-full">
@@ -485,8 +490,10 @@
         let currentFrameSlotIndex = 0;
 
 
-        // --- DOM Elements ---
-        const pages = ['page-welcome', 'page-layout', 'page-frame', 'page-multi-frame', 'page-camera', 'page-preview'];
+        // ------ DOM Elements -------
+        // pageeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee //
+        // pageeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee //
+        const pages = ['page-welcome', 'page-layout', 'page-frame', 'page-multi-frame', 'page-camera', 'page-preview'];    
         const elements = {};
         pages.forEach(id => elements[id] = document.getElementById(id));
         elements.layoutOptions = document.getElementById('layout-options');
@@ -542,7 +549,7 @@ const layouts = {
         stripHeight: 2700, 
         aspectRatio: 'strip', 
         mode: 'multi-frame',
-        image: 'layout.png' // ⭐ ADDED image reference
+        image: 'layout.png' 
     },
     C: { 
         poses: 2, 
@@ -551,7 +558,7 @@ const layouts = {
         stripHeight: 1600, 
         aspectRatio: 'photo', 
         mode: 'multi-frame',
-        image: 'layout.png' // ⭐ ADDED image reference
+        image: 'layout.png' 
     },
 };
 
@@ -1178,29 +1185,34 @@ const layouts = {
             });
         }
 
-        // --- PREVIEW/DOWNLOAD LOGIC ---
+// --- PREVIEW/DOWNLOAD LOGIC ---
 
-        function downloadStrip() {
-            const dataURL = elements.stripCanvas.toDataURL('image/png');
-            const a = document.createElement('a');
-            a.href = dataURL;
-            a.download = `optisaver_strip_${Date.now()}.png`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            displayMessage("Download started!", 2000);
-        }
+function downloadStrip() {
+    const dataURL = elements.stripCanvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = dataURL;
+    a.download = `optisaver_strip_${Date.now()}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    displayMessage("Download started!", 2000);
+}
 
-        function showQRCodeModal() {
-            // Note: Canvas environment prevents full QR generation or large data URL transfer.
-            // We use a placeholder QR image for demonstration.
-            elements.qrCodeImage.src = `https://placehold.co/200x200/FFDD4A/264E2A?text=Scan+to+Download`;
-            elements.qrModal.classList.remove('hidden');
-        }
+function showQRCodeModal() {
+    // Placeholder QR code (replace with actual QR generation if needed)
+    elements.qrCodeImage.src = `https://placehold.co/200x200/FFDD4A/264E2A?text=Scan+to+Download`;
+    elements.qrModal.classList.remove('hidden');
+}
 
-        function hideQRCodeModal() {
-            elements.qrModal.classList.add('hidden');
-        }
+function hideQRCodeModal() {
+    elements.qrModal.classList.add('hidden');
+}
+
+// Opens Instagram Story camera on mobile
+function shareOnInstagramStory() {
+    window.location.href = "instagram://story-camera";
+}
+
 
       function resetAndStartNew() {
     // Stop any running camera
