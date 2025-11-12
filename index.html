@@ -454,9 +454,10 @@
         </button>
 
         <!-- Share on Instagram Story -->
-        <button onclick="shareOnInstagramStory()" class="start-button flex-1 text-base py-2 px-4 transition duration-150 transform hover:scale-[1.02]">
-            Share on Instagram Story
-        </button>
+<button onclick="shareOnInstagramStory()" class="start-button">
+    Share on Instagram Story
+</button>
+
     </div>
 </div>
 
@@ -1208,10 +1209,23 @@ function hideQRCodeModal() {
     elements.qrModal.classList.add('hidden');
 }
 
-// Opens Instagram Story camera on mobile
 function shareOnInstagramStory() {
+    // Step 1: Download the photo strip automatically
+    const dataURL = elements.stripCanvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = dataURL;
+    a.download = `optisaver_strip_${Date.now()}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    // Optional: show a quick message
+    displayMessage("Photo saved! Open Instagram to share.", 2000);
+
+    // Step 2: Open Instagram Story camera
     window.location.href = "instagram://story-camera";
 }
+
 
 
       function resetAndStartNew() {
