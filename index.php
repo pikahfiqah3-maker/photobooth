@@ -673,62 +673,61 @@ function generateFrameOptions($frames, $forMultiFrame = false) {
         let multiFrameSelection = [null, null, null, null];
         let currentFrameSlotIndex = 0;
 
-
        // ------ DOM Elements (Declarations only) -------
-// Keep the core list of page IDs and the main 'elements' object
-const pages = ['page-welcome', 'page-layout', 'page-frame', 'page-multi-frame', 'page-camera', 'page-preview'];
-const elements = {}; 
+        // Keep the core list of page IDs and the main 'elements' object
+        const pages = ['page-welcome', 'page-layout', 'page-frame', 'page-multi-frame', 'page-camera', 'page-preview'];
+        const elements = {}; 
 
-// CHANGE: Declare these with 'let' and set them to null/empty array.
-// The actual elements will be assigned inside the safe cacheDOMElements function later.
-let frameSlotElements = [];
-let videoContainerWrapper = null;
+        // CHANGE: Declare these with 'let' and set them to null/empty array.
+        // The actual elements will be assigned inside the safe cacheDOMElements function later.
+        let frameSlotElements = [];
+        let videoContainerWrapper = null;
 
-function cacheDOMElements() {
-    // 1. Assign page wrappers
-    pages.forEach(id => elements[id] = document.getElementById(id));
-    
-    // 2. Assign Layout/Frame elements
-    elements.layoutOptions = document.getElementById('layout-options');
-    elements.frameOptions = document.getElementById('frame-options');
-    elements.frameModeInfo = document.getElementById('frame-mode-info');
-    
-    // 3. Assign Multi-Frame elements
-    elements.multiFrameOptions = document.getElementById('multi-frame-options');
-    elements.multiFrameSlots = document.getElementById('multi-frame-slots');
-    elements.multiFrameDoneBtn = document.getElementById('multi-frame-done-btn');
-    elements.currentSelectionTitle = document.getElementById('current-selection-title');
-    
-    // 4. Assign Camera/Capture elements
-    elements.cameraFeed = document.getElementById('camera-feed');
-    elements.countdownOverlay = document.getElementById('countdown-overlay');
-    elements.captureStatus = document.getElementById('capture-status');
-    elements.startCaptureBtn = document.getElementById('start-capture-btn');
-    elements.retakeBtn = document.getElementById('retake-btn');
-    elements.doneBtn = document.getElementById('done-btn');
-    elements.timerSelect = document.getElementById('timer-select');
-    
-    // 5. Assign Preview/Canvas/Utility elements
-    elements.finalStripImage = document.getElementById('final-strip-image');
-    elements.stripCanvas = document.getElementById('strip-canvas');
-    elements.photoCanvas = document.getElementById('photo-canvas');
-    elements.finalStripContainer = document.getElementById('final-strip-container');
-    elements.messageBox = document.getElementById('message-box'); // <-- THE CRITICAL FIX
-    
-    // 6. Assign QR Modal elements
-    elements.qrModal = document.getElementById('qr-modal');
-    elements.qrCodeImage = document.getElementById('qr-code-image');
-    
-    // 7. Assign slot array and video wrapper
-    frameSlotElements = [
-        document.getElementById('slot-0'),
-        document.getElementById('slot-1'),
-        document.getElementById('slot-2'),
-        document.getElementById('slot-3'),
-    ];
+        function cacheDOMElements() {
+            // 1. Assign page wrappers
+            pages.forEach(id => elements[id] = document.getElementById(id));
+            
+            // 2. Assign Layout/Frame elements
+            elements.layoutOptions = document.getElementById('layout-options');
+            elements.frameOptions = document.getElementById('frame-options');
+            elements.frameModeInfo = document.getElementById('frame-mode-info');
+            
+            // 3. Assign Multi-Frame elements
+            elements.multiFrameOptions = document.getElementById('multi-frame-options');
+            elements.multiFrameSlots = document.getElementById('multi-frame-slots');
+            elements.multiFrameDoneBtn = document.getElementById('multi-frame-done-btn');
+            elements.currentSelectionTitle = document.getElementById('current-selection-title');
+            
+            // 4. Assign Camera/Capture elements
+            elements.cameraFeed = document.getElementById('camera-feed');
+            elements.countdownOverlay = document.getElementById('countdown-overlay');
+            elements.captureStatus = document.getElementById('capture-status');
+            elements.startCaptureBtn = document.getElementById('start-capture-btn');
+            elements.retakeBtn = document.getElementById('retake-btn');
+            elements.doneBtn = document.getElementById('done-btn');
+            elements.timerSelect = document.getElementById('timer-select');
+            
+            // 5. Assign Preview/Canvas/Utility elements
+            elements.finalStripImage = document.getElementById('final-strip-image');
+            elements.stripCanvas = document.getElementById('strip-canvas');
+            elements.photoCanvas = document.getElementById('photo-canvas');
+            elements.finalStripContainer = document.getElementById('final-strip-container');
+            elements.messageBox = document.getElementById('message-box'); // <-- THE CRITICAL FIX
+            
+            // 6. Assign QR Modal elements
+            elements.qrModal = document.getElementById('qr-modal');
+            elements.qrCodeImage = document.getElementById('qr-code-image');
+            
+            // 7. Assign slot array and video wrapper
+            frameSlotElements = [
+                document.getElementById('slot-0'),
+                document.getElementById('slot-1'),
+                document.getElementById('slot-2'),
+                document.getElementById('slot-3'),
+            ];
 
-    videoContainerWrapper = document.querySelector(".video-container-wrapper");
-}
+            videoContainerWrapper = document.querySelector(".video-container-wrapper");
+        }
         // --- LAYOUT DEFINITIONS (PHP Array Echoed into JS) ---
         const layouts = <?php echo json_encode($layouts); ?>;
 
@@ -1347,14 +1346,8 @@ async function downloadStrip() {
         const result = await response.json(); // PHP returns a JSON object
 
         if (result.success) {
-            // Success! The photo is in the 'photos/' folder.
-            displayMessage(`✅ Picture saved successfully as: ${result.filename}`, 4000);
-            
-            // Generate the full URL for the QR code
-            // This constructs a URL like http://localhost/optisaver-photobooth/photos/photobooth_...png
+            displayMessage(`✅ Picture saved successfully as: ${result.filename}`, 4000);    
             const downloadUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + '/' + result.url;
-            
-            // Show the QR code modal after successful save
             generateQRCode(downloadUrl);
 
         } else {
