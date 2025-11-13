@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OptiSaver Photo Booth</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* --- CSS STYLES --- */
+        /* Custom styles for a dark, engaging photobooth look */
+        
+        /* 🎨 THEME COLORS 🎨
+        Dark Green (Primary): #264E2A
+        Accent Yellow (Logo Glasses): #FFDD4A 
+        White/Light Text: #f3f4f6
+        */
+        
+       body {
+    font-family: 'Inter', sans-serif;
+
+    /* 1. Solid color as a fallback in case image fails to load */
+    background-color: #264E2A;
+
+    /* 2. Add your background image */
+    background-image: url('background2.jpg');
+
+    /* 3. Control image display */
+    background-size: cover;          /* Make image cover entire screen */
+    background-position: center;     /* Center the image */
+    background-attachment: fixed;    /* Keep image fixed during scroll */
+    background-repeat: no-repeat;    /* Prevent repeating */
+
+    /* 4. Layout settings */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 1rem;
+}
+
+.app-container {
+    background-color: transparent; /* Remove the dark green box */
+    box-shadow: none; /* Remove shadow if you don’t want any border effect */
+    border-radius: 0; /* Optional: remove rounded corners */
+    padding: 1.5rem;
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #f3f4f6;
+    max-width: 90%;
+    width: 500px;
+}
+
+        
+        .page {
+            width: 100%;
+            height: 100%;
+            display: none; /* Controlled by JS */
+            text-align: center;
+            min-height: 500px;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        /* Style for the video feed to ensure it fits and looks good */
+        #camera-feed {
+            transform: scaleX(-1); /* Mirror the camera view */
+            width: 100%;
+            height: auto; 
+            object-fit: cover;
+            border-radius: 0.75rem;
+            /* 4. Use Accent Yellow/Gold for camera border */
+            border: 4px solid #FFDD4A; 
+            background-color: black;
+        }
+        
+        /* The relative wrapper that contains the video and overlay */
+        .relative.video-container-wrapper {
+             max-height: 400px; 
+             max-width: 400px;
+             width: 100%;
+             aspect-ratio: 1 / 1; 
+             margin: 0 auto;
+        }
+        
+        #live-frame-overlay {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 0.75rem;
+        }
+        
+        #countdown-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 8rem;
+            font-weight: bold;
+            /* 5. Countdown text color */
+            color: #FFDD4A; 
+            text-shadow: 0 0 20px #FFDD4A;
+            background-color: rgba(0, 0, 0, 0.4);
+            border-radius: 0.75rem;
+        }
+        .frame-card {
+            border: 3px solid transparent;
+        }
+        .frame-card:hover {
+            border-color: #FFDD4A; /* Accent yellow on hover */
+        }
+        .frame-preview {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* --- Multi-Frame Styles (Adjusting colors) --- */
+        .slot-card {
+            background-color: #385e3c; /* Darker green */
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 2px dashed #9ca3af;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .slot-card.selected {
+            border-color: #FFDD4A; /* Accent Yellow */
+            background-color: #1a361e; /* Even darker green */
+        }
+        .slot-card span {
+             color: #FFDD4A !important;
+        }
+
+
+    /* --- Fullscreen Camera Fix (Keeping for functionality) --- */
+
+    .fullscreen-active #page-camera .relative.video-container-wrapper {
+        max-width: none; 
+        max-height: none;
+        width: 100vw !important; 
+        height: 100vh !important;
+        margin: 0;
+        aspect-ratio: unset; 
+        display: flex; 
+        justify-content: center;
+        align-items: center;
+        background-color: black; 
+    }
+
+    .fullscreen-active video#camera-feed {
+        width: 100% !important; 
+        height: 100% !important;
+        object-fit: contain !important; 
+        border: none;
+        border-radius: 0;
+    }
+
+    .fullscreen-active #live-frame-overlay {
+        width: 100% !important; 
+        height: 100% !important;
+        border-radius: 0;
+        object-fit: contain !important; 
+    }
+
+.fullscreen-active #fullscreen-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        background-color: rgba(0, 0, 0, 0.6);
+    }
+    
+    /* --- NEW CSS for Fullscreen Take Photo Button (Keeping the red for high contrast capture) --- */
+    .fullscreen-active #fullscreen-capture-btn {
+        position: fixed;
+        bottom: 30px; 
+        left: 50%; 
+        transform: translateX(-50%);
+        z-index: 9999;
+        background-color: #ef4444; 
+        color: white;
+        border: 4px solid #f9fafb; 
+        border-radius: 9999px; 
+        width: 80px;
+        height: 80px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.5rem;
+        cursor: pointer;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+        transition: background-color 0.15s;
+    }
+
+    .fullscreen-active #fullscreen-capture-btn:hover {
+        background-color: #dc2626; 
+    }
+
+    /* Hide the original controls when in fullscreen */
+    .fullscreen-active #page-camera .flex.space-x-4 {
+        display: none !important;
+    }
+
+    /* --- Custom Welcome Page Styling based on Sample Image --- */
+    #page-welcome {
+        /* Set minimum height to center the content nicely */
+        min-height: 400px; 
+        justify-content: center;
+    }
+
+    #page-welcome h1 {
+        /* Match the large, bold, central title of the sample */
+        font-size: 4rem; /* Larger than 4xl */
+        font-weight: 900; /* Extra bold */
+        color: #FFDD4A; /* Accent Yellow */
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        /* Optional: Add a subtle text shadow for pop */
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5); 
+    }
+
+    #page-welcome p {
+        /* Match the descriptive text style */
+        font-size: 1.5rem; /* Larger description */
+        color: #f3f4f6;
+        margin-bottom: 3rem;
+        font-style: italic;
+    }
+
+    .start-button {
+        /* Match the prominent, rounded, and colorful START button of the sample */
+        padding: 1rem 3rem;
+        /* Use a contrasting color like pink/red for the START button for pop, 
+           or use the accent yellow if you want to stick strictly to the logo palette. 
+           I'll use a vibrant gold/yellow here. */
+        background-color: #FFDD4A; 
+        color: #264E2A; /* Dark Green text on the button */
+        font-size: 1.8rem;
+        font-weight: bold;
+        border-radius: 9999px; /* Fully rounded */
+        box-shadow: 0 6px 15px -3px rgba(255, 221, 74, 0.5), 0 4px 6px -2px rgba(255, 221, 74, 0.3);
+        transition: all 0.2s;
+        border: 3px solid #f3f4f6; /* White border for extra pop */
+    }
+
+    .start-button:hover {
+        background-color: #ffe680;
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px -4px rgba(255, 221, 74, 0.7);
+    }
+
+    /* --- General Button Styles --- */
+
+    .bg-indigo-600 { /* Old button */
+        background-color: #FFDD4A;
+        color: #264E2A;
+    }
+    .hover\:bg-indigo-700:hover { /* Old button hover */
+        background-color: #ffe680;
+    }
+
+    .bg-green-500 { /* Start Capture */
+        background-color: #FFDD4A;
+        color: #264E2A;
+    }
+    .hover\:bg-green-600:hover {
+        background-color: #ffe680;
+    }
+
+    .bg-yellow-500 { /* Retake */
+        background-color: #f59e0b; /* A darker yellow for distinction */
+        color: white;
+    }
+    .hover\:bg-yellow-600:hover {
+        background-color: #d97706;
+    }
+    
+    .bg-blue-500 { /* Done */
+        background-color: #3b82f6; /* Keeping blue for primary action distinction */
+        color: white;
+    }
+    .hover\:bg-blue-600:hover {
+        background-color: #2563eb;
+    }
+
+    .bg-pink-600 { /* Download */
+        background-color: #FFDD4A;
+        color: #264E2A;
+    }
+    .hover\:bg-pink-700:hover {
+        background-color: #ffe680;
+    }
+
+    .bg-purple-600 { /* QR Code */
+        background-color: #7c3aed; /* Keeping purple for distinction */
+        color: white;
+    }
+    .hover\:bg-purple-700:hover {
+        background-color: #6d28d9;
+    }
+
+    .bg-green-600 { /* Multi-Frame Done */
+        background-color: #10b981; /* Keeping a strong green for completion/go button */
+        color: white;
+    }
+    .hover\:bg-green-700:hover {
+        background-color: #059669;
+    }
+    
+    /* Layout & Frame card backgrounds */
+    .bg-gray-600 {
+        background-color: #385e3c; /* Darker theme green */
+    }
+    .hover\:bg-indigo-500:hover {
+        background-color: #518c55; /* Lighter theme green on hover */
+    }
+    .hover\:bg-gray-500:hover {
+        background-color: #518c55;
+    }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div id="message-box" class="fixed top-5 left-1/2 -translate-x-1/2 bg-red-600 text-white p-3 rounded-lg shadow-xl z-50 transition-opacity duration-300 opacity-0 pointer-events-none" role="alert"></div>
+
+        <canvas id="photo-canvas" class="hidden"></canvas>
+        <canvas id="strip-canvas" class="hidden"></canvas>
+
+        <div id="page-welcome" class="page flex">
+            <h1 class="text-4xl font-extrabold mb-1">OptiSaver Booth</h1>
+            <p class="text-gray-300 mb-8 text-xl">Clear Version, Credible Value</p>
+            <button onclick="showPage('page-layout')" class="start-button transition duration-150 transform hover:scale-105">
+                START 📸
+            </button>
+        </div>
+
+        <div id="page-layout" class="page">
+            <h2 class="text-3xl font-bold mb-8 text-white">Choose Your Layout</h2>
+            <div id="layout-options" class="grid grid-cols-2 gap-4 w-full">
+                </div>
+            <button onclick="showPage('page-welcome')" class="mt-8 text-white-400 hover:text-white transition duration-150">
+                &larr; Back to Welcome
+            </button>
+        </div>
+
+        <div id="page-frame" class="page">
+            <h2 class="text-3xl font-bold mb-8 text-white">Select Your Decorative Frame</h2>
+            <p id="frame-mode-info" class="text-gray-400 mb-6"></p>
+            <div id="frame-options" class="grid grid-cols-2 gap-6 w-full">
+                </div>
+            <button onclick="showPage('page-layout')" class="mt-8 text-gray-400 hover:text-white transition duration-150">
+                &larr; Back to Layouts
+            </button>
+        </div>
+        
+        <div id="page-multi-frame" class="page">
+            <h2 class="text-3xl font-bold mb-6 text-white">Choose 4 Frames (1 for each Pose)</h2>
+            <div class="multi-frame-selection">
+                <div id="multi-frame-slots" class="multi-frame-slots mb-6">
+                    <div id="slot-0" class="slot-card" data-index="0">Pose 1 Frame: <span class="font-bold text-yellow-300">Choose...</span></div>
+                    <div id="slot-1" class="slot-card" data-index="1">Pose 2 Frame: <span class="font-bold text-yellow-300">Choose...</span></div>
+                    <div id="slot-2" class="slot-card" data-index="2">Pose 3 Frame: <span class="font-bold text-yellow-300">Choose...</span></div>
+                    <div id="slot-3" class="slot-card" data-index="3">Pose 4 Frame: <span class="font-bold text-yellow-300">Choose...</span></div>
+                </div>
+                
+                <h3 id="current-selection-title" class="text-2xl font-semibold mb-4 text-white">Select a Frame for Pose 1</h3>
+                
+                <div id="multi-frame-options" class="grid grid-cols-2 gap-4 w-full h-96 overflow-y-auto p-2 bg-gray-700 rounded-lg shadow-inner">
+                    </div>
+                
+                <button id="multi-frame-done-btn" onclick="goToCameraFromMultiFrame()" class="mt-8 px-8 py-3 bg-green-600 hover:bg-green-700 text-white text-xl font-semibold rounded-xl shadow-lg transition duration-150 opacity-50 cursor-not-allowed" disabled>
+                    Start Camera Session
+                </button>
+                <button onclick="showPage('page-layout')" class="mt-4 text-gray-400 hover:text-white transition duration-150">
+                    &larr; Back to Layouts
+                </button>
+            </div>
+        </div>
+
+
+<div id="page-camera" class="page">
+    <h2 id="camera-title" class="text-2xl font-bold mb-4 text-white"></h2>
+    <div class="relative w-full mb-4 max-w-sm mx-auto video-container-wrapper"> 
+        <video id="camera-feed" playsinline autoplay></video>
+
+        <img id="live-frame-overlay"
+             class="absolute top-0 left-0 w-full h-full object-cover rounded-xl pointer-events-none hidden" />
+
+        <div id="countdown-overlay" class="rounded-xl hidden"></div>
+
+        <button id="fullscreen-btn" 
+    class="absolute top-2 right-2 bg-black bg-opacity-60 text-white text-sm px-3 py-1 rounded-lg hover:bg-opacity-80">
+    ⛶ Fullscreen
+</button>
+
+<button id="fullscreen-capture-btn" class="hidden">
+    📸
+</button>
+</div>
+    <div class="flex items-center justify-center mb-4 space-x-2">
+        <label for="timer-select" class="text-gray-300 font-medium">Capture Timer:</label>
+        <select id="timer-select" class="px-3 py-1 bg-gray-700 text-white rounded-lg border border-gray-600 focus:ring-yellow-400 focus:border-yellow-400">
+            <option value="3">3 Seconds</option>
+            <option value="5">5 Seconds</option>
+            <option value="10">10 Seconds</option>
+        </select>
+    </div>
+    <div id="capture-status" class="text-lg text-gray-300 mb-4 font-mono">Ready to start!</div>
+            <div class="flex space-x-4">
+                <button id="start-capture-btn" class="px-6 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow-md transition duration-150">
+                    Start Capture
+                </button>
+                <button id="retake-btn" class="px-6 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg shadow-md transition duration-150 hidden">
+                    Retake (Current Pose)
+                </button>
+                <button id="done-btn" class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-md transition duration-150 hidden" disabled>
+                    Done &rarr; Preview
+                </button>
+            </div>
+        </div>
+
+   <div id="page-preview" class="page">
+            <h2 class="text-3xl font-bold mb-6 text-white">Your Photo Strip is Ready!</h2>
+            <div id="final-strip-container" class="mb-6 bg-white p-1 rounded-lg shadow-xl w-3/4 max-w-sm">
+                <img id="final-strip-image" src="" alt="Final Photo Strip" class="w-full h-auto rounded-md"/>
+            </div>
+                <div class="flex flex-col space-y-4 w-full max-w-xs">
+                        <!-- Share on Download -->
+                <button onclick="downloadStrip()" class="start-button flex-1 text-base py-2 px-4 transition duration-150 transform hover:scale-[1.02]">
+                    Download Image
+                </button>
+                        <!-- Share on QR Code -->
+                <button onclick="showQRCodeModal()" class="start-button flex-1 text-base py-2 px-4 transition duration-150 transform hover:scale-[1.02]">
+                    Download via QR Code
+                </button>
+                        <!-- Share on Instagram Story -->
+                <button onclick="shareOnInstagramStory()" class="start-button flex-1 text-base py-2 px-4 transition duration-150 transform hover:scale-[1.02]">
+                    Share on Instagram Story
+                </button>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="qr-modal" class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 hidden">
+        <div class="bg-white p-8 rounded-xl shadow-2xl text-center max-w-sm w-full">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">Scan to Download</h3>
+            <img id="qr-code-image" src="" alt="QR Code" class="w-48 h-48 mx-auto mb-4 border-4 border-gray-200 p-2 rounded-lg"/>
+            <p class="text-gray-600 mb-6">Scan this QR code with your phone to download the photo strip directly!</p>
+            <button onclick="hideQRCodeModal()" class="px-6 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- JAVASCRIPT LOGIC ---
+        const apiKey = "";
+
+        // --- GLOBAL STATE ---
+        let currentPage = 'page-welcome';
+        let selectedLayout = null;
+        // selectedFrame can be an object (for single frame mode) or an array of 4 objects (for multi-frame mode)
+        let selectedFrame = null; 
+        let capturedImages = [];
+        let cameraStream = null;
+        let captureLoopActive = false;
+        let countdownSeconds = 3;
+        
+        // State for multi-frame selection
+        let multiFrameSelection = [null, null, null, null];
+        let currentFrameSlotIndex = 0;
+
+
+        // ------ DOM Elements -------
+        // pageeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee //
+        // pageeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee //
+        const pages = ['page-welcome', 'page-layout', 'page-frame', 'page-multi-frame', 'page-camera', 'page-preview'];    
+        const elements = {};
+        pages.forEach(id => elements[id] = document.getElementById(id));
+        elements.layoutOptions = document.getElementById('layout-options');
+        elements.frameOptions = document.getElementById('frame-options');
+        elements.multiFrameOptions = document.getElementById('multi-frame-options');
+        elements.multiFrameSlots = document.getElementById('multi-frame-slots');
+        elements.multiFrameDoneBtn = document.getElementById('multi-frame-done-btn');
+        elements.currentSelectionTitle = document.getElementById('current-selection-title');
+        elements.frameModeInfo = document.getElementById('frame-mode-info');
+        elements.cameraFeed = document.getElementById('camera-feed');
+        elements.countdownOverlay = document.getElementById('countdown-overlay');
+        elements.captureStatus = document.getElementById('capture-status');
+        elements.startCaptureBtn = document.getElementById('start-capture-btn');
+        elements.retakeBtn = document.getElementById('retake-btn');
+        elements.doneBtn = document.getElementById('done-btn');
+        elements.finalStripImage = document.getElementById('final-strip-image');
+        elements.stripCanvas = document.getElementById('strip-canvas');
+        elements.photoCanvas = document.getElementById('photo-canvas');
+        elements.qrModal = document.getElementById('qr-modal');
+        elements.qrCodeImage = document.getElementById('qr-code-image');
+        elements.messageBox = document.getElementById('message-box');
+        elements.finalStripContainer = document.getElementById('final-strip-container');
+        elements.timerSelect = document.getElementById('timer-select'); // NEW ELEMENT
+
+        // Cache the slot elements
+        const frameSlotElements = [
+            document.getElementById('slot-0'),
+            document.getElementById('slot-1'),
+            document.getElementById('slot-2'),
+            document.getElementById('slot-3'),
+        ];
+        
+        // Cache the video wrapper element for fullscreen target
+        const videoContainerWrapper = document.querySelector(".video-container-wrapper");
+
+
+        // --- LAYOUT DEFINITIONS ---
+        // stripWidth and stripHeight define the target canvas size in pixels.
+const layouts = {
+    A: { 
+        poses: 1, 
+        description: "6 x 4 Photo (1 Pose)", 
+        stripWidth: 1800, 
+        stripHeight: 1200, 
+        aspectRatio: 'photo', 
+        mode: 'single-frame',
+        image: 'layout.png' 
+    },
+    B: { 
+        poses: 4, 
+        description: "6 x 2 Strip (4 Pose) - MULTI-FRAME", 
+        stripWidth: 900, 
+        stripHeight: 2700, 
+        aspectRatio: 'strip', 
+        mode: 'multi-frame',
+        image: 'layout.png' 
+    },
+    C: { 
+        poses: 2, 
+        description: "6 x 4 Strip (2 Pose) - MULTI-FRAME", 
+        stripWidth: 1200, 
+        stripHeight: 1600, 
+        aspectRatio: 'photo', 
+        mode: 'multi-frame',
+        image: 'layout.png' 
+    },
+};
+
+        // --- FRAME DEFINITIONS (Using uploaded files) ---
+        const frames = { 
+            frame1: { 
+                name: "frame1", 
+                file: 'frame1.png', 
+                description: "test1.",
+                idealFor: 'strip'
+            },
+            frame2: { 
+                name: "test2", 
+                file: 'frame2.png',
+                description: "test2.",
+                idealFor: 'photo'
+            },
+            frame3: { 
+                name: "test3", 
+                file: 'frame3.png', 
+                description: "test3",
+                idealFor: 'photo'
+            },
+                frame4: { 
+                name: "test4", 
+                file: 'frame4.png', 
+                description: "test4",
+                idealFor: 'photo'
+            },
+            frame5: { 
+                name: "test5", 
+                file: 'frame5.png', 
+                description: "test5",
+                idealFor: 'photo'
+            },
+   
+                  frame6: { 
+                name: "Optometrist", 
+                file: 'frame6.png', 
+                description: "Medical/Optom themed.",
+                idealFor: 'photo'
+            },      frame7: { 
+                name: "Optometrist", 
+                file: 'frame7.png', 
+                description: "Medical/Optom themed.",
+                idealFor: 'photo'
+            },
+        };
+
+
+        // --- UTILITY FUNCTIONS ---
+
+        function displayMessage(text, duration = 3000) {
+            elements.messageBox.textContent = text;
+            elements.messageBox.classList.remove('opacity-0', 'pointer-events-none');
+            elements.messageBox.classList.add('opacity-100');
+
+            setTimeout(() => {
+                elements.messageBox.classList.remove('opacity-100');
+                elements.messageBox.classList.add('opacity-0', 'pointer-events-none');
+            }, duration);
+        }
+
+        function showPage(pageName) {
+            // Stop camera if leaving the camera page
+            if (currentPage === 'page-camera' && pageName !== 'page-camera') {
+                stopCamera();
+            }
+
+            pages.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.style.display = (id === pageName) ? 'flex' : 'none';
+                }
+            });
+            currentPage = pageName;
+
+            // Specific initialization for pages
+            if (pageName === 'page-layout') {
+                setupLayouts();
+            }
+            if (pageName === 'page-frame') {
+                // Only show this page for single-frame layouts
+                if (selectedLayout.mode !== 'single-frame') {
+                    showPage('page-layout'); // Redirect if error
+                    return;
+                }
+                setupSingleFrames();
+            }
+            if (pageName === 'page-multi-frame') {
+                // Only show this page for multi-frame layouts
+                if (selectedLayout.mode !== 'multi-frame') {
+                    showPage('page-layout'); // Redirect if error
+                    return;
+                }
+                setupMultiFrames();
+            }
+            if (pageName === 'page-camera') {
+                const frameName = Array.isArray(selectedFrame) ? 'Multi-Frame Custom' : selectedFrame.name;
+                document.getElementById('camera-title').textContent = `Layout ${selectedLayout.id}, Frame: ${frameName}`;
+                startCamera();
+                setupCameraPage();
+            }
+            if (pageName === 'page-preview') {
+                // Adjust preview container size based on the selected layout's aspect ratio
+                const isStrip = selectedLayout.aspectRatio === "strip";
+                elements.finalStripContainer.classList.remove('w-3/4', 'max-w-sm', 'w-full', 'max-w-xs', 'w-1/2', 'max-w-[160px]');
+                if (isStrip) {
+                    // Tall and narrow for 6x2 strip
+                    elements.finalStripContainer.classList.add('w-1/2', 'max-w-[160px]'); 
+                } else {
+                    // Wider for 6x4 photo
+                    elements.finalStripContainer.classList.add('w-full', 'max-w-sm');
+                }
+                compositeStrip();
+            }
+        }
+
+        // --- INITIALIZATION (Layout Selection Logic) ---
+
+        function setupLayouts() {
+            elements.layoutOptions.innerHTML = '';
+            Object.keys(layouts).forEach(id => {
+                const layout = layouts[id];
+                const card = document.createElement('div');
+                card.className = 'p-4 bg-gray-600 rounded-xl shadow-lg cursor-pointer hover:bg-indigo-500 transition duration-150 transform hover:scale-[1.02] flex flex-col justify-between h-full';
+                
+                // ⭐ CORRECTED/ADDED LOGIC: Get image HTML if the layout has an image property
+                const imageHtml = layout.image ? 
+                    `<img src="${layout.image}" alt="Layout ${id} Preview" class="w-full h-auto rounded-md mb-3" style="max-height: 100px; object-fit: contain; background-color: #f3f4f6; padding: 4px;"/>` 
+                    : '';
+                // ⭐ END ADDED LOGIC
+
+                card.innerHTML = `
+                    <h3 class="text-xl font-bold mb-1 text-white">Layout ${id}</h3>
+                    ${imageHtml} <!-- ⭐ INCLUDE THE IMAGE HERE ⭐ -->
+                    <p class="text-gray-300 text-sm">${layout.description}</p>
+                    <p class="text-gray-200 mt-2 font-mono text-xs">Poses: ${layout.poses}</p>
+                `;
+                card.onclick = () => selectLayout(id);
+                elements.layoutOptions.appendChild(card);
+            });
+        }
+
+        function selectLayout(id) {
+            selectedLayout = { ...layouts[id], id };
+            selectedFrame = null; // Reset frame selection
+            capturedImages = []; // Reset images for new session
+            
+            if (selectedLayout.mode === 'single-frame') {
+                elements.frameModeInfo.textContent = `You are selecting one frame for the entire ${selectedLayout.description}.`;
+                showPage('page-frame'); 
+            } else if (selectedLayout.mode === 'multi-frame') {
+                // Initialize the multi-frame selection state
+                multiFrameSelection = new Array(selectedLayout.poses).fill(null);
+                currentFrameSlotIndex = 0;
+                showPage('page-multi-frame');
+            }
+        }
+
+        // --- FRAME SELECTION LOGIC (SINGLE FRAME) ---
+
+        function setupSingleFrames() { 
+            elements.frameOptions.innerHTML = '';
+            const layoutAspectRatio = selectedLayout.aspectRatio;
+
+            Object.keys(frames).forEach(id => {
+                const frame = frames[id];
+                const card = document.createElement('div');
+                card.id = `frame-card-${id}`;
+
+                let warningText = '';
+                if (frame.idealFor !== layoutAspectRatio) {
+                    warningText = `<p class="text-red-300 text-xs font-bold mt-1">Warning: Designed for ${frame.idealFor.toUpperCase()} size!</p>`;
+                }
+                
+                card.className = 'frame-card p-4 bg-gray-600 rounded-xl shadow-lg cursor-pointer transition duration-150 transform hover:scale-[1.02]';
+                
+                card.innerHTML = `
+                    <img src="${frame.file}" alt="${frame.name} Preview" class="frame-preview"/>
+                    <h3 class="text-lg font-bold mb-1 text-white">${frame.name}</h3>
+                    <p class="text-gray-300 text-xs">${frame.description}</p>
+                    ${warningText}
+                `;
+                card.onclick = () => selectSingleFrame(id);
+                elements.frameOptions.appendChild(card);
+                
+                // Set highlight if already selected
+                if (selectedFrame && selectedFrame.id === id) {
+                    card.style.borderColor = '#FFDD4A';
+                }
+            });
+        }
+
+        function selectSingleFrame(id) {
+            selectedFrame = { ...frames[id], id };
+            const layoutAspectRatio = selectedLayout.aspectRatio;
+
+            // Highlight selected card
+            Object.keys(frames).forEach(key => {
+                const card = document.getElementById(`frame-card-${key}`);
+                if (card) {
+                    card.style.borderColor = (key === id) ? '#FFDD4A' : 'transparent'; // Accent Yellow
+                }
+            });
+            
+            // Show a warning if the user selects a frame not ideal for the current layout
+            if (selectedFrame.idealFor !== layoutAspectRatio) {
+                 displayMessage(`⚠️ Warning: This frame is ideal for ${selectedFrame.idealFor.toUpperCase()} layouts. It may look stretched on the ${layoutAspectRatio.toUpperCase()} strip.`, 6000);
+            }
+
+            showPage('page-camera'); // Navigate to photo taking
+        }
+        
+        // --- FRAME SELECTION LOGIC (MULTI-FRAME) ---
+        
+        function setupMultiFrames() {
+            elements.multiFrameOptions.innerHTML = '';
+            
+            // 1. Setup Frame Slots (clickable to change the current selection index)
+            frameSlotElements.forEach((slot, index) => {
+                slot.onclick = () => setCurrentFrameSlot(index);
+                // Initialize slot display
+                if (multiFrameSelection[index]) {
+                    slot.innerHTML = `Pose ${index + 1} Frame: <span class="font-bold" style="color:#FFDD4A;">${multiFrameSelection[index].name}</span>`;
+                } else {
+                    slot.innerHTML = `Pose ${index + 1} Frame: <span class="font-bold" style="color:#f59e0b;">Choose...</span>`;
+                }
+            });
+            
+            setCurrentFrameSlot(0); // Start at the first slot
+
+            // 2. Setup Frame Options (clickable to select a frame for the current slot)
+            Object.keys(frames).forEach(id => {
+                const frame = frames[id];
+                const card = document.createElement('div');
+                card.className = 'frame-card p-2 bg-gray-600 rounded-xl shadow-lg cursor-pointer transition duration-150 hover:bg-gray-500';
+                card.innerHTML = `
+                    <img src="${frame.file}" alt="${frame.name} Preview" class="frame-preview h-24"/>
+                    <h3 class="text-sm font-bold text-white">${frame.name}</h3>
+                `;
+                card.onclick = () => selectMultiFrame(id);
+                elements.multiFrameOptions.appendChild(card);
+            });
+        }
+        
+        function setCurrentFrameSlot(index) {
+            currentFrameSlotIndex = index;
+            
+            // Update title
+            elements.currentSelectionTitle.textContent = `Select a Frame for Pose ${index + 1}`;
+
+            // Highlight the active slot
+            frameSlotElements.forEach((slot, i) => {
+                slot.classList.remove('selected');
+                if (i === index) {
+                    slot.classList.add('selected');
+                }
+            });
+        }
+        
+        function selectMultiFrame(id) {
+            const frame = { ...frames[id], id };
+            multiFrameSelection[currentFrameSlotIndex] = frame;
+            
+            // Update slot display
+            const slotElement = frameSlotElements[currentFrameSlotIndex];
+            slotElement.innerHTML = `Pose ${currentFrameSlotIndex + 1} Frame: <span class="font-bold" style="color:#FFDD4A;">${frame.name}</span>`;
+            
+            // Move to the next slot, or enable the Done button
+            const nextIndex = currentFrameSlotIndex + 1;
+            if (nextIndex < selectedLayout.poses) {
+                setCurrentFrameSlot(nextIndex);
+            }
+            
+            checkMultiFrameCompletion();
+        }
+        
+        function checkMultiFrameCompletion() {
+            const allSelected = multiFrameSelection.slice(0, selectedLayout.poses).every(frame => frame !== null);
+            if (allSelected) {
+                elements.multiFrameDoneBtn.disabled = false;
+                elements.multiFrameDoneBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                elements.multiFrameDoneBtn.textContent = 'All Frames Selected! Start Camera Session';
+                displayMessage('✅ All required frames selected! You can now start the camera.', 3000);
+            }
+        }
+        
+        function goToCameraFromMultiFrame() {
+            selectedFrame = multiFrameSelection; // Pass the array of frames to the main state
+            showPage('page-camera');
+        }
+
+
+        // --- CAMERA LOGIC (Corresponds to snap.html logic) ---
+
+     async function startCamera() {
+    if (cameraStream) return;
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "user" } // Use front camera if available
+        });
+        cameraStream = stream;
+        elements.cameraFeed.srcObject = stream;
+
+        // Show frame overlay live during camera view
+        const overlay = document.getElementById('live-frame-overlay');
+        if (Array.isArray(selectedFrame)) {
+            // In multi-frame mode, just show the first frame as preview
+            overlay.src = selectedFrame[0].file;
+        } else {
+            overlay.src = selectedFrame.file;
+        }
+        overlay.classList.remove('hidden');
+
+        elements.cameraFeed.play();
+        displayMessage("Camera access granted. Ready to capture.", 2000);
+    } catch (err) {
+        console.error("Error accessing camera: ", err);
+        displayMessage("🚨 Error: Could not access camera. Please check permissions.", 5000);
+    }
+}
+
+
+        function stopCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+        }
+
+        function setupCameraPage() {
+            capturedImages = [];
+            elements.startCaptureBtn.classList.remove('hidden');
+            elements.retakeBtn.classList.add('hidden');
+            elements.doneBtn.classList.add('hidden');
+            elements.doneBtn.disabled = true;
+            elements.captureStatus.textContent = `Current Pose: 0 / ${selectedLayout.poses}`;
+            elements.startCaptureBtn.onclick = startCaptureSequence;
+            
+            // If only 1 pose is required, change the button text
+            if (selectedLayout.poses === 1) {
+                elements.startCaptureBtn.textContent = 'Take Photo';
+                elements.captureStatus.textContent = 'Ready for Single Photo Capture!';
+            } else {
+                 elements.startCaptureBtn.textContent = 'Start Capture';
+            }
+        }
+
+        // ----- CAPTURE SEQUENCE (Corresponds to snap.html logic) -----
+
+        async function startCaptureSequence() {
+            if (captureLoopActive) return;
+            captureLoopActive = true;
+            elements.startCaptureBtn.disabled = true;
+
+            const totalPoses = selectedLayout.poses;
+            const liveFrameOverlay = document.getElementById('live-frame-overlay'); // Get the overlay element
+
+            while (capturedImages.length < totalPoses) {
+                const currentPoseIndex = capturedImages.length; // Index starts at 0
+                const currentPose = currentPoseIndex + 1; // Pose number starts at 1
+                elements.captureStatus.textContent = `Getting ready for Pose ${currentPose}...`;
+                
+                // Update the live frame overlay for the current pose
+                if (Array.isArray(selectedFrame)) {
+                    // Check if a frame is selected for this pose index
+                    const frameForCurrentPose = selectedFrame[currentPoseIndex];
+                    if (frameForCurrentPose) {
+                        liveFrameOverlay.src = frameForCurrentPose.file;
+                        liveFrameOverlay.classList.remove('hidden');
+                    } else {
+                        // Fallback if somehow a pose doesn't have a frame (shouldn't happen with current logic)
+                        liveFrameOverlay.classList.add('hidden');
+                    }
+                }
+
+                // Run countdown
+                await new Promise(resolve => {
+                    elements.countdownOverlay.classList.remove('hidden');
+                    let count = countdownSeconds;
+                    elements.countdownOverlay.textContent = count;
+                    const timer = setInterval(() => {
+                        count--;
+                        if (count > 0) {
+                            elements.countdownOverlay.textContent = count;
+                        } else {
+                            clearInterval(timer);
+                            elements.countdownOverlay.classList.add('hidden');
+                            elements.countdownOverlay.textContent = ''; // Clear text
+                            resolve();
+                        }
+                    }, 1000);
+                });
+
+                // Capture image
+                const image = captureFrame();
+                capturedImages.push(image);
+                displayMessage(totalPoses > 1 ? `Pose ${currentPose} captured!` : `Photo captured!`, 1500);
+
+                // Update status
+                elements.captureStatus.textContent = `Current Pose: ${currentPose} / ${totalPoses}`;
+
+                if (currentPose < totalPoses) {
+                    // Setup for Retake or Next Capture
+                    elements.startCaptureBtn.textContent = `Take Pose ${currentPose + 1}`;
+                    elements.retakeBtn.classList.remove('hidden');
+                    elements.retakeBtn.onclick = () => retakePose(currentPose - 1);
+                } else {
+                    // All photos taken
+                    break;
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Short pause before next pose prompt
+            }
+
+            // Sequence complete
+            captureLoopActive = false;
+            elements.startCaptureBtn.classList.add('hidden');
+            elements.retakeBtn.classList.remove('hidden'); // Keep retake visible for single shot too
+            elements.retakeBtn.textContent = totalPoses > 1 ? 'Retake Last Pose' : 'Retake Photo';
+            elements.retakeBtn.onclick = () => retakePose(totalPoses - 1); // Retake the final (or only) shot
+
+            elements.doneBtn.classList.remove('hidden');
+            elements.doneBtn.disabled = false;
+            elements.captureStatus.textContent = totalPoses > 1 ? 
+                `All ${totalPoses} poses captured! Click 'Done' to preview.` : 
+                `Photo captured! Click 'Done' to preview.`;
+            elements.doneBtn.onclick = () => showPage('page-preview');
+        }
+
+        function captureFrame() {
+            const video = elements.cameraFeed;
+            const canvas = elements.photoCanvas;
+
+            // Capture resolution (use video intrinsic size for best quality)
+            const w = video.videoWidth;
+            const h = video.videoHeight;
+            canvas.width = w;
+            canvas.height = h;
+
+            const ctx = canvas.getContext('2d');
+            // Draw mirrored image to match user's view
+            ctx.translate(w, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(video, 0, 0, w, h);
+            ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transformation
+
+            return canvas.toDataURL('image/jpeg');
+        }
+
+        function retakePose(indexToRetake) {
+            // Remove the last captured image
+            capturedImages.splice(indexToRetake, 1);
+            
+            const totalPoses = selectedLayout.poses;
+            
+            // If we retake the only image (indexToRetake === 0 and totalPoses === 1)
+            if (totalPoses === 1) {
+                elements.startCaptureBtn.textContent = 'Take Photo';
+                elements.captureStatus.textContent = 'Ready for Single Photo Capture!';
+            } else {
+                 elements.startCaptureBtn.textContent = `Take Pose ${indexToRetake + 1}`;
+                 elements.captureStatus.textContent = `Pose ${indexToRetake + 1} retaken. Click to capture again.`;
+            }
+            
+            elements.retakeBtn.classList.add('hidden');
+            elements.doneBtn.classList.add('hidden');
+            elements.startCaptureBtn.classList.remove('hidden');
+            elements.startCaptureBtn.disabled = false;
+            captureLoopActive = false;
+        }
+
+        // --- PHOTO STRIP GENERATION (Applying the frame) ---
+
+        function compositeStrip() {
+            const layout = selectedLayout;
+            const framesToUse = selectedFrame; // Can be object or array
+            
+            if (!layout || capturedImages.length !== layout.poses || !framesToUse) {
+                console.error("Layout, captured images, or frame missing.");
+                displayMessage("Error: Could not generate strip. Try retaking photos or selecting a frame.", 4000);
+                return;
+            }
+
+            const canvas = elements.stripCanvas;
+            const stripW = layout.stripWidth;
+            const stripH = layout.stripHeight;
+            canvas.width = stripW;
+            canvas.height = stripH;
+            const ctx = canvas.getContext('2d');
+
+            // 1. Initial Fill (for clean strip background before images are drawn)
+            ctx.fillStyle = '#264E2A';
+            ctx.fillRect(0, 0, stripW, stripH);
+
+            // Define layout constants
+            const border = stripW * 0.05; // 5% of width
+            const gap = layout.poses === 1 ? 0 : border; 
+            
+            const contentWidth = stripW - (2 * border);
+            const contentHeight = stripH - (2 * border);
+
+            const totalGapSpace = gap * (layout.poses - 1);
+            const photoHeight = layout.poses === 1 ? contentHeight : Math.floor((contentHeight - totalGapSpace) / layout.poses);
+            const photoWidth = contentWidth; 
+
+            let currentY = border;
+
+            const allPromises = capturedImages.map((dataURL, index) => {
+                const photoBox = { 
+                    x: border, 
+                    y: currentY, 
+                    w: photoWidth, 
+                    h: photoHeight 
+                };
+                currentY += photoHeight + gap;
+                
+                // Determine the frame for this specific pose
+                const frameData = Array.isArray(framesToUse) ? framesToUse[index] : framesToUse;
+
+                return new Promise(resolve => {
+                    const img = new Image();
+                    img.onload = () => {
+                        // Create promise for the frame image
+                        const framePromise = new Promise(frameResolve => {
+                            const frameImg = new Image();
+                            frameImg.onload = () => frameResolve(frameImg);
+                            frameImg.onerror = () => {
+                                console.warn(`Failed to load frame for pose ${index + 1}. Skipping frame draw.`);
+                                frameResolve(null); // Resolve with null on error
+                            };
+                            frameImg.src = frameData.file;
+                        });
+
+                        // Resolve with both the loaded photo and the frame promise
+                        resolve({ img, photoBox, framePromise });
+                    };
+                    img.src = dataURL;
+                });
+            });
+
+            Promise.all(allPromises).then(drawDataArray => {
+                // Wait for all frame images to load (or fail)
+                const framePromises = drawDataArray.map(data => data.framePromise);
+                return Promise.all(framePromises).then(loadedFrames => {
+                    
+                    // 2. Draw all captured images onto the strip
+                    drawDataArray.forEach((data, index) => {
+                        const { img, photoBox } = data;
+                        const frameImg = loadedFrames[index];
+                        
+                        // --- A. Draw the Photo Cropped and Scaled ---
+                        const imgRatio = img.width / img.height;
+                        const frameRatio = photoBox.w / photoBox.h;
+                        let sourceX = 0, sourceY = 0, sourceW = img.width, sourceH = img.height;
+
+                        // Calculate cropping to fit the photo into the aspect ratio of the target box
+                        if (imgRatio > frameRatio) {
+                            sourceW = img.height * frameRatio;
+                            sourceX = (img.width - sourceW) / 2;
+                        } else if (imgRatio < frameRatio) {
+                            sourceH = img.width / frameRatio;
+                            sourceY = (img.height - sourceH) / 2;
+                        }
+
+                        ctx.drawImage(
+                            img, 
+                            sourceX, sourceY, sourceW, sourceH,
+                            photoBox.x, photoBox.y, photoBox.w, photoBox.h
+                        );
+                        
+                        // --- B. Draw the Frame Overlay (if in Multi-Frame Mode) ---
+                        if (selectedLayout.mode === 'multi-frame' && frameImg) {
+                            // In multi-frame mode, the frame is stretched/scaled to perfectly fill the photo box
+                            ctx.drawImage(frameImg, photoBox.x, photoBox.y, photoBox.w, photoBox.h);
+                        }
+                    });
+
+                    // 3. Draw the Single Custom Frame Overlay (if in Single Frame Mode)
+                    if (selectedLayout.mode === 'single-frame') {
+                        const frameData = framesToUse; // Single object
+                        const frameImg = new Image();
+                        frameImg.onload = () => {
+                            // --- SCALING LOGIC FOR SINGLE FRAME OVERLAY (Contain) ---
+                            const frameRatio = frameImg.width / frameImg.height;
+                            const canvasRatio = stripW / stripH;
+                            
+                            let drawW, drawH, drawX, drawY;
+
+                            if (frameRatio > canvasRatio) {
+                                // Frame is WIDER than the canvas, scale based on WIDTH
+                                drawW = stripW;
+                                drawH = stripW / frameRatio;
+                                drawX = 0;
+                                drawY = (stripH - drawH) / 2; // Center vertically
+                            } else {
+                                // Frame is TALLER or equal to the canvas, scale based on HEIGHT
+                                drawH = stripH;
+                                drawW = stripH * frameRatio;
+                                drawY = 0;
+                                drawX = (stripW - drawW) / 2; // Center horizontally
+                            }
+
+                            ctx.drawImage(frameImg, drawX, drawY, drawW, drawH);
+                            elements.finalStripImage.src = canvas.toDataURL('image/png');
+                        };
+                        frameImg.onerror = (e) => {
+                            console.error("Failed to load single frame image:", frameData.file, e);
+                            displayMessage(`Error loading single frame image: ${frameData.file}.`, 5000);
+                            elements.finalStripImage.src = canvas.toDataURL('image/png');
+                        };
+                        frameImg.src = frameData.file;
+                    } else {
+                        // Finalize and display for Multi-Frame mode
+                        elements.finalStripImage.src = canvas.toDataURL('image/png');
+                    }
+                    
+                });
+
+            }).catch(e => {
+                console.error("Error in drawing images:", e);
+                displayMessage("A critical error occurred while preparing the images.", 5000);
+            });
+        }
+
+        // --- PREVIEW/DOWNLOAD LOGIC ---
+
+        function downloadStrip() {
+            const dataURL = elements.stripCanvas.toDataURL('image/png');
+            const a = document.createElement('a');
+            a.href = dataURL;
+            a.download = `optisaver_strip_${Date.now()}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            displayMessage("Download started!", 2000);
+        }
+
+        function showQRCodeModal() {
+            // Note: Canvas environment prevents full QR generation or large data URL transfer.
+            // We use a placeholder QR image for demonstration.
+            elements.qrCodeImage.src = `https://placehold.co/200x200/FFDD4A/264E2A?text=Scan+to+Download`;
+            elements.qrModal.classList.remove('hidden');
+        }
+
+        function hideQRCodeModal() {
+            elements.qrModal.classList.add('hidden');
+        }
+        
+        function shareOnInstagramStory() {
+            // Step 1: Download the photo strip automatically
+            const dataURL = elements.stripCanvas.toDataURL('image/png');
+            const a = document.createElement('a');
+            a.href = dataURL;
+            a.download = `optisaver_strip_${Date.now()}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            // Optional: show a quick message
+            displayMessage("Photo saved! Open Instagram to share.", 2000);
+
+            // Step 2: Open Instagram Story camera
+            window.location.href = "instagram://story-camera";
+        }
+
+      function resetAndStartNew() {
+    // Stop any running camera
+    stopCamera();
+
+    // Reset all state
+    selectedLayout = null;
+    selectedFrame = null;
+    capturedImages = [];
+    multiFrameSelection = [null, null, null, null];
+    currentFrameSlotIndex = 0;
+    captureLoopActive = false;
+
+    // Reset UI buttons and overlays
+    elements.startCaptureBtn.disabled = false;
+    elements.startCaptureBtn.classList.remove('hidden');
+    elements.retakeBtn.classList.add('hidden');
+    elements.doneBtn.classList.add('hidden');
+    elements.doneBtn.disabled = true;
+    elements.countdownOverlay.classList.add('hidden');
+    elements.captureStatus.textContent = "Ready to start!";
+
+    // Reinitialize layouts (so new session works)
+    setupLayouts();
+
+    // Go back to welcome page properly
+    showPage('page-welcome');
+
+    // Show success message
+    displayMessage("🎉 Ready for a new photo session!");
+}
+
+
+        // --- APP STARTUP ---
+// --- APP STARTUP ---
+        
+        function setupTimerSelection() {
+            // Set the default value on load
+            elements.timerSelect.value = countdownSeconds; 
+            
+            // Add event listener to update the global variable
+            elements.timerSelect.addEventListener('change', (event) => {
+                countdownSeconds = parseInt(event.target.value);
+                displayMessage(`Capture timer set to ${countdownSeconds} seconds.`, 2000);
+            });
+        }
+        
+        window.onload = function() {
+            setupLayouts();
+            setupTimerSelection(); // NEW: Initialize the timer logic
+            showPage('page-welcome'); // Start on the welcome page
+        };
+
+      // --- FULLSCREEN TOGGLE ---
+      // --- FULLSCREEN TOGGLE ---
+document.addEventListener("DOMContentLoaded", () => {
+    const fullscreenBtn = document.getElementById("fullscreen-btn");
+    // FIXED: Target the video wrapper for fullscreen (which now correctly scales using CSS)
+    const videoContainer = document.querySelector(".relative.video-container-wrapper"); 
+    
+    // ⭐ NEW: Get the fullscreen capture button element ⭐
+    const fullscreenCaptureBtn = document.getElementById("fullscreen-capture-btn");
+
+    // ⭐ NEW: Click handler for the fullscreen capture button ⭐
+    fullscreenCaptureBtn.addEventListener("click", () => {
+        // We trigger a click on the START/RETAKE/DONE button, whichever is visible/active
+        if (!elements.startCaptureBtn.disabled && !elements.startCaptureBtn.classList.contains('hidden')) {
+             // Check if capture is currently active (to prevent spamming the button during countdown)
+             if (!captureLoopActive) { 
+                 elements.startCaptureBtn.click();
+             } else {
+                 displayMessage("📸 Pose capture in progress, please wait...", 2000);
+             }
+        } else if (!elements.retakeBtn.classList.contains('hidden')) {
+             elements.retakeBtn.click();
+        } else if (!elements.doneBtn.disabled && !elements.doneBtn.classList.contains('hidden')) {
+             elements.doneBtn.click();
+        } else {
+             displayMessage("Please wait for the capture sequence to be ready...", 2000);
+        }
+    });
+    // ⭐ END NEW ELEMENT HANDLER ⭐
+
+    fullscreenBtn.addEventListener("click", async () => {
+        if (!document.fullscreenElement) {
+            // Enter fullscreen
+            if (videoContainer.requestFullscreen) {
+                await videoContainer.requestFullscreen();
+            } else if (videoContainer.webkitRequestFullscreen) {
+                videoContainer.webkitRequestFullscreen();
+            }
+            // Keep the class on the body to drive the fixed fullscreen styling
+            document.body.classList.add("fullscreen-active"); 
+            fullscreenBtn.textContent = "✖ Exit";
+        } else {
+            // Exit fullscreen
+            if (document.exitFullscreen) {
+                await document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
+            document.body.classList.remove("fullscreen-active");
+            fullscreenBtn.textContent = "⛶ Fullscreen";
+        }
+    });
+
+    // Handle ESC key or manual exit
+    document.addEventListener("fullscreenchange", () => {
+        if (!document.fullscreenElement) {
+            document.body.classList.remove("fullscreen-active");
+            fullscreenBtn.textContent = "⛶ Fullscreen";
+        }
+    });
+});
+
+    </script>
+</body>
+</html>
